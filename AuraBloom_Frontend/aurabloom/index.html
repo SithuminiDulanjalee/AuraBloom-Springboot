@@ -2,9 +2,231 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraBloom | Where Your Inner Energy Blossoms</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #fdf2f8 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+        }
+
+        .aura-glow {
+            box-shadow: 0 0 40px rgba(253, 224, 71, 0.3);
+        }
+
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .flower {
+            position: absolute;
+            font-size: 26px;
+            opacity: 0.6;
+            animation-name: floatFlower;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        .blue { color: #60a5fa; }
+        .green { color: #34d399; }
+        .pink { color: #f472b6; }
+
+        @keyframes floatFlower {
+            0% {
+                transform: translateY(110vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            15% { opacity: 0.6; }
+            100% {
+                transform: translateY(-20vh) translateX(30px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        main, nav {
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-login-btn {
+            position: relative;
+            padding: 2px;
+            background: linear-gradient(90deg, #60a5fa, #f472b6, #34d399, #60a5fa);
+            background-size: 300% 100%;
+            border-radius: 9999px;
+            animation: moveGradient 4s linear infinite;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-login-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-login-btn span {
+            display: block;
+            background: white;
+            padding: 8px 24px;
+            border-radius: 9999px;
+            font-weight: 700;
+            color: #334155;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .dark .nav-login-btn span {
+            background: #0f172a;
+            color: white;
+        }
+
+        .nav-login-btn:hover span {
+            background: transparent;
+            color: white;
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .cta-glow-btn {
+            position: relative;
+            padding: 3px;
+            background: linear-gradient(90deg, #6366f1, #ec4899, #10b981, #6366f1);
+            background-size: 300% 100%;
+            border-radius: 20px;
+            animation: moveGradient 4s linear infinite;
+            display: inline-block;
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .cta-glow-btn span {
+            display: block;
+            background: #0f172a;
+            padding: 16px 40px;
+            border-radius: 18px;
+            font-weight: 800;
+            font-size: 1.125rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-glow-btn span::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 20%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(30deg);
+            transition: none;
+            animation: shimmer 3s infinite;
+        }
+
+        .cta-glow-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(236, 72, 153, 0.6);
+        }
+
+        @keyframes shimmer {
+            0% { left: -60%; }
+            100% { left: 120%; }
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+    </style>
 </head>
-<body>
+
+<body class="text-slate-800">
+
+<div class="flowers">
+    <span class="flower blue" style="left:5%;  animation-duration:18s; animation-delay:-2s;">🌸</span>
+    <span class="flower green" style="left:15%; animation-duration:22s; animation-delay:-8s;">🌼</span>
+    <span class="flower pink" style="left:25%; animation-duration:20s; animation-delay:-12s;">🌺</span>
+
+    <span class="flower blue" style="left:40%; animation-duration:24s; animation-delay:-5s;">🌸</span>
+    <span class="flower green" style="left:55%; animation-duration:19s; animation-delay:-10s;">🌼</span>
+    <span class="flower pink" style="left:65%; animation-duration:26s; animation-delay:-15s;">🌺</span>
+
+    <span class="flower blue" style="left:75%; animation-duration:21s; animation-delay:-7s;">🌸</span>
+    <span class="flower green" style="left:85%; animation-duration:23s; animation-delay:-13s;">🌼</span>
+    <span class="flower pink" style="left:95%; animation-duration:25s; animation-delay:-18s;">🌺</span>
+</div>
+
+<nav class="p-6 flex justify-between items-center relative z-20">
+    <div class="flex items-center gap-4">
+        <div class="w-16 h-16 md:w-20 md:h-20 bg-white rounded-3xl flex items-center justify-center shadow-xl hover:rotate-6 transition-transform">
+            <span class="text-4xl">🌸</span>
+        </div>
+        <span class="text-3xl font-black tracking-tighter text-slate-800">AuraBloom</span>
+    </div>
+
+    <div class="flex items-center gap-6">
+        <a href="pages/sign-in.html" class="nav-login-btn">
+            <span>Login</span>
+        </a>
+    </div>
+</nav>
+
+<main class="container mx-auto px-6 pt-12 pb-24 flex flex-col items-center text-center">
+    <h1 class="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-emerald-500 to-pink-500">
+        Where Your Inner <br> Energy Blossoms.
+    </h1>
+
+    <p class="text-lg md:text-xl text-slate-600 max-w-2xl mb-10 leading-relaxed">
+        AuraBloom goes beyond tracking. We analyze your emotional patterns to predict risks and provide personalized paths.
+    </p>
+
+    <div class="flex gap-4">
+        <a href="pages/sign-up.html" class="cta-glow-btn">
+            <span>Start Your Journey</span>
+        </a>
+    </div>
+
+    <section class="container mx-auto px-6 py-12">
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="glass-card p-8 hover-lift">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg mb-4 flex items-center justify-center text-blue-600">🧠</div>
+                <h3 class="text-xl font-bold mb-2">Risk Prediction</h3>
+                <p class="text-slate-500">Intelligent behavioral analysis that identifies emotional stress before it peaks.</p>
+            </div>
+
+            <div class="glass-card p-8 hover-lift">
+                <div class="w-12 h-12 bg-emerald-100 rounded-lg mb-4 flex items-center justify-center text-emerald-600">⏳</div>
+                <h3 class="text-xl font-bold mb-2">Journaling</h3>
+                <p class="text-slate-500">Write to yourself. Reflect, heal and rediscover your progress over time.</p>
+            </div>
+
+            <div class="glass-card p-8 hover-lift">
+                <div class="w-12 h-12 bg-pink-100 rounded-lg mb-4 flex items-center justify-center text-pink-600">🏆</div>
+                <h3 class="text-xl font-bold mb-2">Gamified Growth</h3>
+                <p class="text-slate-500">Earn badges and levels as you master the art of mindfulness and consistency.</p>
+            </div>
+        </div>
+    </section>
+</main>
 
 </body>
 </html>
