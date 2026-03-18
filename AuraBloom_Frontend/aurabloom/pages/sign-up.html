@@ -107,47 +107,73 @@
   function toggleTheme() {
     const html = document.documentElement;
     const icon = document.getElementById('theme-icon');
+
     if (html.classList.contains('dark')) {
       html.classList.remove('dark');
       icon.innerText = '🌙';
-      localStorage.theme = 'light';
+      localStorage.setItem('theme', 'light');
     } else {
       html.classList.add('dark');
       icon.innerText = '☀️';
-      localStorage.theme = 'dark';
+      localStorage.setItem('theme', 'dark');
     }
   }
 
-  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark');
-    document.getElementById('theme-icon').innerText = '☀️';
-  }
+  $(document).ready(function () {
+    if (
+            localStorage.getItem('theme') === 'dark' ||
+            (!localStorage.getItem('theme') &&
+                    window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ) {
+      document.documentElement.classList.add('dark');
+      $('#theme-icon').text('☀️');
+    }
 
-  const API = "http://localhost:8080/api/auth/register";
+    $("#signupForm").on("submit", function (e) {
+      e.preventDefault();
 
-  document.getElementById("signupForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const username = document.getElementById("name").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+      const username = $("#name").val().trim();
+      const email = $("#email").val().trim();
+      const password = $("#password").val().trim();
 
-    try {
-      const res = await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password })
-      });
-      const data = await res.json();
-      if(data.code === 201) {
-        alert("Account created successfully");
-        window.location.href = "sign-in.html";
-      } else {
-        alert(data.message);
+      if (!username || !email || !password) {
+        alert("All fields are required!");
+        return;
       }
-    } catch(err) {
-      alert("Signup failed. Check your API server.");
-    }
+
+      $.ajax({
+        url: "http://localhost:8080/api/auth/register",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({
+          username: username,
+          email: email,
+          password: password
+        }),
+
+        success: function (data) {
+          if (data.code === 201) {
+            alert("Account created successfully");
+            window.location.href = "sign-in.html";
+          } else {
+            alert(data.message || "Signup failed!");
+          }
+        },
+
+        error: function (xhr) {
+          if (xhr.status === 400) {
+            alert("Invalid input or user already exists!");
+          } else if (xhr.status === 500) {
+            alert("Server error. Try again later.");
+          } else {
+            alert("Something went wrong!");
+          }
+          console.error(xhr.responseText);
+        }
+      });
+    });
   });
+
 </script>
 </body>
 </html>
