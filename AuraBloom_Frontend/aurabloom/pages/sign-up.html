@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AuraBloom | Sign Up</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
@@ -150,21 +151,19 @@
           email: email,
           password: password
         }),
-
-        success: function (data) {
-          if (data.code === 201) {
+        success: function (res) {
+          if (res.code === 201) {
             alert("Account created successfully");
             window.location.href = "sign-in.html";
           } else {
-            alert(data.message || "Signup failed!");
+            alert(res.message || "Signup failed!");
           }
         },
-
         error: function (xhr) {
-          if (xhr.status === 400) {
-            alert("Invalid input or user already exists!");
-          } else if (xhr.status === 500) {
-            alert("Server error. Try again later.");
+          if (xhr.status === 409) {
+            alert("Email already exists!");
+          } else if (xhr.status === 400) {
+            alert("Invalid input!");
           } else {
             alert("Something went wrong!");
           }
@@ -173,7 +172,6 @@
       });
     });
   });
-
 </script>
 </body>
 </html>

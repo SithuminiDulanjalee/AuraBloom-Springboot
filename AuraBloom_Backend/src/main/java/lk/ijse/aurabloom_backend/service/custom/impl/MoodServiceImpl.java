@@ -11,14 +11,11 @@ import lk.ijse.aurabloom_backend.repository.UserRepository;
 import lk.ijse.aurabloom_backend.service.custom.MoodService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -26,170 +23,140 @@ public class MoodServiceImpl implements MoodService {
 
     private final MoodEntryRepository moodEntryRepository;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private MoodEntryDTO toDTO(MoodEntry entry) {
+        MoodEntryDTO dto = modelMapper.map(entry, MoodEntryDTO.class);
+        dto.setMoodType(entry.getMoodType().name());
+        return dto;
+    }
+
+    private MoodType parseMoodType(String moodType) {
+        try {
+            return MoodType.valueOf(moodType.toUpperCase());
+        } catch (Exception e) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, "Invalid mood type");
+        }
+    }
+
+    private Map<String, Long> initMoodCounts() {
+        Map<String, Long> counts = new LinkedHashMap<>();
+        for (MoodType type : MoodType.values()) {
+            counts.put(type.name(), 0L);
+        }
+        return counts;
+    }
 
     @Override
     public MoodEntryDTO createMood(String email, MoodEntryDTO dto) {
-
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("User not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
 
-        MoodEntry entry = modelMapper.map(dto, MoodEntry.class);
-
-        entry.setMoodType(MoodType.valueOf(dto.getMoodType().toUpperCase()));
-        entry.setCreatedDate(LocalDate.now());
+        MoodEntry entry = new MoodEntry();
+        entry.setMoodType(parseMoodType(dto.getMoodType()));
+        entry.setNote(dto.getNote());
+        entry.setCreatedDate(dto.getCreatedDate() != null ? dto.getCreatedDate() : LocalDate.now());
         entry.setUser(user);
 
         MoodEntry saved = moodEntryRepository.save(entry);
-
-        return modelMapper.map(saved, MoodEntryDTO.class);
+        return toDTO(saved);
     }
 
     @Override
     public List<MoodEntryDTO> getAllMoods(String email) {
-
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("User not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
 
-        List<MoodEntry> moods = moodEntryRepository.findByUser(user);
-
-        List<MoodEntryDTO> result = new ArrayList<>();
-
-        for (MoodEntry mood : moods) {
-            result.add(modelMapper.map(mood, MoodEntryDTO.class));
-        }
-
-        return result;
+        return moodEntryRepository.findByUserOrderByCreatedDateDesc(user)
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     @Override
     public MoodEntryDTO updateMood(String email, Long id, MoodEntryDTO dto) {
-
         MoodEntry entry = moodEntryRepository.findById(id)
-                .orElseThrow(() -> new CustomException("Mood entry not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "Mood entry not found"));
 
         if (!entry.getUser().getEmail().equals(email)) {
-            throw new CustomException("Unauthorized");
+            throw new CustomException(HttpStatus.FORBIDDEN, "Unauthorized");
         }
 
-        entry.setMoodType(MoodType.valueOf(dto.getMoodType().toUpperCase()));
+        entry.setMoodType(parseMoodType(dto.getMoodType()));
         entry.setNote(dto.getNote());
+        if (dto.getCreatedDate() != null) {
+            entry.setCreatedDate(dto.getCreatedDate());
+        }
 
         MoodEntry updated = moodEntryRepository.save(entry);
-
-        return modelMapper.map(updated, MoodEntryDTO.class);
+        return toDTO(updated);
     }
 
     @Override
     public void deleteMood(String email, Long id) {
-
         MoodEntry entry = moodEntryRepository.findById(id)
-                .orElseThrow(() -> new CustomException("Mood entry not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "Mood entry not found"));
 
         if (!entry.getUser().getEmail().equals(email)) {
-            throw new CustomException("Unauthorized");
+            throw new CustomException(HttpStatus.FORBIDDEN, "Unauthorized");
         }
 
         moodEntryRepository.delete(entry);
     }
 
-
     @Override
-    public List<MoodTrendDTO> getWeeklyTrend(String email) {
-
+    public MoodTrendDTO getWeeklyTrend(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("User not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
 
         LocalDate today = LocalDate.now();
+        LocalDate weekStart = today.minusDays(6);
 
-        LocalDate weekStart = today.minusDays(today.getDayOfWeek().getValue() - 1);
+        List<MoodEntry> moods = moodEntryRepository.findByUserAndCreatedDateBetween(user, weekStart, today);
 
-        LocalDate weekEnd = weekStart.plusDays(6);
-
-        List<MoodEntry> moods =
-                moodEntryRepository.findByUserAndCreatedDateBetween(user, weekStart, weekEnd);
-
-        Map<String, Long> counts = new HashMap<>();
-
+        Map<String, Long> counts = initMoodCounts();
         for (MoodEntry mood : moods) {
-
             String moodName = mood.getMoodType().name();
-
-            counts.put(moodName, counts.getOrDefault(moodName, 0L) + 1);
+            counts.put(moodName, counts.get(moodName) + 1);
         }
 
-        List<MoodTrendDTO> result = new ArrayList<>();
-
-        result.add(new MoodTrendDTO(weekStart, weekEnd, counts));
-
-        return result;
+        return new MoodTrendDTO(weekStart, today, counts);
     }
 
     @Override
-    public List<MoodTrendDTO> getMonthlyTrend(String email) {
-
+    public MoodTrendDTO getMonthlyTrend(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("User not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
 
         LocalDate today = LocalDate.now();
+        LocalDate monthStart = today.withDayOfMonth(1);
 
-        LocalDate startOfYear = LocalDate.of(today.getYear(), 1, 1);
+        List<MoodEntry> moods = moodEntryRepository.findByUserAndCreatedDateBetween(user, monthStart, today);
 
-        List<MoodEntry> moods =
-                moodEntryRepository.findByUserAndCreatedDateBetween(user, startOfYear, today);
-
-        List<MoodTrendDTO> result = new ArrayList<>();
-
-        for (int month = 1; month <= today.getMonthValue(); month++) {
-
-            LocalDate monthStart = LocalDate.of(today.getYear(), month, 1);
-            LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
-
-            Map<String, Long> counts = new HashMap<>();
-
-            for (MoodEntry mood : moods) {
-
-                if (!mood.getCreatedDate().isBefore(monthStart) &&
-                        !mood.getCreatedDate().isAfter(monthEnd)) {
-
-                    String moodName = mood.getMoodType().name();
-
-                    counts.put(moodName, counts.getOrDefault(moodName, 0L) + 1);
-                }
-            }
-
-            result.add(new MoodTrendDTO(monthStart, monthEnd, counts));
+        Map<String, Long> counts = initMoodCounts();
+        for (MoodEntry mood : moods) {
+            String moodName = mood.getMoodType().name();
+            counts.put(moodName, counts.get(moodName) + 1);
         }
 
-        return result;
+        return new MoodTrendDTO(monthStart, today, counts);
     }
 
     @Override
     public double getEmotionalRiskScore(String email) {
-
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("User not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
 
         LocalDate last30Days = LocalDate.now().minusDays(30);
-
         List<MoodEntry> moods = moodEntryRepository.findByUserAndCreatedDateAfter(user, last30Days);
 
-        long negativeCount = 0;
-
-        for (MoodEntry mood : moods) {
-
-            if (mood.getMoodType() == MoodType.SAD ||
-                    mood.getMoodType() == MoodType.STRESSED) {
-
-                negativeCount++;
-            }
+        if (moods.isEmpty()) {
+            return 0.0;
         }
 
-        if (moods.size() == 0) {
-            return 0;
-        }
+        long negativeCount = moods.stream()
+                .filter(m -> m.getMoodType() == MoodType.SAD || m.getMoodType() == MoodType.STRESSED)
+                .count();
 
         return (negativeCount * 100.0) / moods.size();
     }

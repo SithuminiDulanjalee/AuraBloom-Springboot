@@ -19,7 +19,6 @@ public class AppConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-
         return email -> userRepository.findByEmail(email)
                 .map(user -> org.springframework.security.core.userdetails.User
                         .builder()
@@ -37,5 +36,4 @@ public class AppConfig {
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
-
 }

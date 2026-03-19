@@ -3,16 +3,12 @@ package lk.ijse.aurabloom_backend.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class UserDTO {
+public class RegisterRequestDTO {
 
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email is required")

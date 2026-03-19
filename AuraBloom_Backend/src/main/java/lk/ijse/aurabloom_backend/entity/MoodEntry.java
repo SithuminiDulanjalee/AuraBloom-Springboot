@@ -21,10 +21,13 @@ public class MoodEntry {
 
     @NotNull(message = "Mood type is required")
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private MoodType moodType;
 
+    @Column(length = 1000)
     private String note;
 
+    @Column(nullable = false)
     private LocalDate createdDate;
 
     @ManyToOne

@@ -33,26 +33,17 @@ public class MoodController {
         MoodEntryDTO mood = moodService.createMood(principal.getName(), dto);
 
         return new ResponseEntity<>(
-                new APIResponse<>(
-                        201,
-                        "Mood created successfully",
-                        mood
-                ),
+                new APIResponse<>(201, "Mood created successfully", mood),
                 HttpStatus.CREATED
         );
     }
 
     @GetMapping
     public ResponseEntity<APIResponse<List<MoodEntryDTO>>> getAllMoods(Principal principal) {
-
         List<MoodEntryDTO> moods = moodService.getAllMoods(principal.getName());
 
         return new ResponseEntity<>(
-                new APIResponse<>(
-                        200,
-                        "Moods fetched successfully",
-                        moods
-                ),
+                new APIResponse<>(200, "Moods fetched successfully", moods),
                 HttpStatus.OK
         );
     }
@@ -66,11 +57,7 @@ public class MoodController {
         MoodEntryDTO mood = moodService.updateMood(principal.getName(), id, dto);
 
         return new ResponseEntity<>(
-                new APIResponse<>(
-                        200,
-                        "Mood updated successfully",
-                        mood
-                ),
+                new APIResponse<>(200, "Mood updated successfully", mood),
                 HttpStatus.OK
         );
     }
@@ -83,56 +70,37 @@ public class MoodController {
         moodService.deleteMood(principal.getName(), id);
 
         return new ResponseEntity<>(
-                new APIResponse<>(
-                        200,
-                        "Mood deleted successfully",
-                        null
-                ),
+                new APIResponse<>(200, "Mood deleted successfully", null),
                 HttpStatus.OK
         );
     }
 
     @GetMapping("/trend/weekly")
-    public ResponseEntity<APIResponse<List<MoodTrendDTO>>> weeklyTrend(Principal principal) {
-
-        List<MoodTrendDTO> trend = moodService.getWeeklyTrend(principal.getName());
+    public ResponseEntity<APIResponse<MoodTrendDTO>> weeklyTrend(Principal principal) {
+        MoodTrendDTO trend = moodService.getWeeklyTrend(principal.getName());
 
         return new ResponseEntity<>(
-                new APIResponse<>(
-                        200,
-                        "Weekly trend fetched successfully",
-                        trend
-                ),
+                new APIResponse<>(200, "Weekly trend fetched successfully", trend),
                 HttpStatus.OK
         );
     }
 
     @GetMapping("/trend/monthly")
-    public ResponseEntity<APIResponse<List<MoodTrendDTO>>> monthlyTrend(Principal principal) {
-
-        List<MoodTrendDTO> trend = moodService.getMonthlyTrend(principal.getName());
+    public ResponseEntity<APIResponse<MoodTrendDTO>> monthlyTrend(Principal principal) {
+        MoodTrendDTO trend = moodService.getMonthlyTrend(principal.getName());
 
         return new ResponseEntity<>(
-                new APIResponse<>(
-                        200,
-                        "Monthly trend fetched successfully",
-                        trend
-                ),
+                new APIResponse<>(200, "Monthly trend fetched successfully", trend),
                 HttpStatus.OK
         );
     }
 
     @GetMapping("/risk")
     public ResponseEntity<APIResponse<Double>> riskScore(Principal principal) {
-
         Double score = moodService.getEmotionalRiskScore(principal.getName());
 
         return new ResponseEntity<>(
-                new APIResponse<>(
-                        200,
-                        "Emotional risk score fetched successfully",
-                        score
-                ),
+                new APIResponse<>(200, "Emotional risk score fetched successfully", score),
                 HttpStatus.OK
         );
     }

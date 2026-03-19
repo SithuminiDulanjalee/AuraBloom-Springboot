@@ -13,9 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MoodTrendDTO {
-
     private LocalDate startDate;
     private LocalDate endDate;
     private Map<String, Long> moodCounts;
-
 }

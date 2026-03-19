@@ -1,9 +1,10 @@
 package lk.ijse.aurabloom_backend.controller;
 
 import jakarta.validation.Valid;
-import lk.ijse.aurabloom_backend.dto.AuthRequest;
-import lk.ijse.aurabloom_backend.dto.AuthResponse;
-import lk.ijse.aurabloom_backend.dto.UserDTO;
+import lk.ijse.aurabloom_backend.dto.AuthResponseDTO;
+import lk.ijse.aurabloom_backend.dto.LoginRequestDTO;
+import lk.ijse.aurabloom_backend.dto.RegisterRequestDTO;
+import lk.ijse.aurabloom_backend.dto.UserResponseDTO;
 import lk.ijse.aurabloom_backend.service.custom.impl.AuthServiceImpl;
 import lk.ijse.aurabloom_backend.service.custom.impl.UserServiceImpl;
 import lk.ijse.aurabloom_backend.util.APIResponse;
@@ -22,33 +23,21 @@ public class AuthController {
     private final AuthServiceImpl authService;
 
     @PostMapping("/register")
-    public ResponseEntity<APIResponse<UserDTO>> register(@Valid @RequestBody UserDTO dto) {
-
-        UserDTO savedUser = userService.register(dto);
+    public ResponseEntity<APIResponse<UserResponseDTO>> register(@Valid @RequestBody RegisterRequestDTO dto) {
+        UserResponseDTO savedUser = userService.register(dto);
 
         return new ResponseEntity<>(
-                new APIResponse<>(
-                        201,
-                        "User registered successfully",
-                        savedUser
-                ),
+                new APIResponse<>(201, "User registered successfully", savedUser),
                 HttpStatus.CREATED
         );
     }
 
     @PostMapping("/login")
-    public ResponseEntity<APIResponse<AuthResponse>> login(@Valid @RequestBody AuthRequest request) {
-
-        String token = authService.login(request);
-
-        AuthResponse response = new AuthResponse(token);
+    public ResponseEntity<APIResponse<AuthResponseDTO>> login(@Valid @RequestBody LoginRequestDTO request) {
+        AuthResponseDTO response = authService.login(request);
 
         return new ResponseEntity<>(
-                new APIResponse<>(
-                        200,
-                        "Login successful",
-                        response
-                ),
+                new APIResponse<>(200, "Login successful", response),
                 HttpStatus.OK
         );
     }

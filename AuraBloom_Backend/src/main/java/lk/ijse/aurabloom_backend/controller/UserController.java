@@ -1,7 +1,8 @@
 package lk.ijse.aurabloom_backend.controller;
 
 import jakarta.validation.Valid;
-import lk.ijse.aurabloom_backend.dto.UserDTO;
+import lk.ijse.aurabloom_backend.dto.ProfileUpdateDTO;
+import lk.ijse.aurabloom_backend.dto.UserResponseDTO;
 import lk.ijse.aurabloom_backend.service.custom.impl.UserServiceImpl;
 import lk.ijse.aurabloom_backend.util.APIResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<APIResponse<List<UserDTO>>> getAllUsers() {
+    public ResponseEntity<APIResponse<List<UserResponseDTO>>> getAllUsers() {
         return new ResponseEntity<>(
                 new APIResponse<>(200, "Users fetched successfully", userService.getAllUsers()),
                 HttpStatus.OK
@@ -31,7 +32,7 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<APIResponse<UserDTO>> getProfile(Principal principal) {
+    public ResponseEntity<APIResponse<UserResponseDTO>> getProfile(Principal principal) {
         return new ResponseEntity<>(
                 new APIResponse<>(200, "Profile fetched successfully", userService.getProfile(principal.getName())),
                 HttpStatus.OK
@@ -39,9 +40,9 @@ public class UserController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<APIResponse<UserDTO>> updateProfile(
+    public ResponseEntity<APIResponse<UserResponseDTO>> updateProfile(
             Principal principal,
-            @Valid @RequestBody UserDTO dto) {
+            @Valid @RequestBody ProfileUpdateDTO dto) {
 
         return new ResponseEntity<>(
                 new APIResponse<>(200, "Profile updated successfully", userService.updateProfile(principal.getName(), dto)),

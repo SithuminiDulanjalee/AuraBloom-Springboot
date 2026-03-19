@@ -9,10 +9,9 @@ import java.util.List;
 
 public interface MoodEntryRepository extends JpaRepository<MoodEntry, Long> {
 
-    List<MoodEntry> findByUser(User user);
+    List<MoodEntry> findByUserOrderByCreatedDateDesc(User user);
 
     List<MoodEntry> findByUserAndCreatedDateBetween(User user, LocalDate start, LocalDate end);
 
     List<MoodEntry> findByUserAndCreatedDateAfter(User user, LocalDate after);
-
 }

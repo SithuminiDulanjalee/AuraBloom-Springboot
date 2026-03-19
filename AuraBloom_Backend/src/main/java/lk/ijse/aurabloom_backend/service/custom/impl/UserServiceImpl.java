@@ -1,14 +1,15 @@
 package lk.ijse.aurabloom_backend.service.custom.impl;
 
-import lk.ijse.aurabloom_backend.dto.UserDTO;
+import lk.ijse.aurabloom_backend.dto.ProfileUpdateDTO;
+import lk.ijse.aurabloom_backend.dto.RegisterRequestDTO;
+import lk.ijse.aurabloom_backend.dto.UserResponseDTO;
 import lk.ijse.aurabloom_backend.entity.Role;
 import lk.ijse.aurabloom_backend.entity.User;
 import lk.ijse.aurabloom_backend.exception.CustomException;
 import lk.ijse.aurabloom_backend.repository.UserRepository;
 import lk.ijse.aurabloom_backend.service.custom.UserService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,13 +23,19 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    private UserResponseDTO toResponse(User user) {
+        return new UserResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRole() != null ? user.getRole().name() : null
+        );
+    }
 
     @Override
-    public UserDTO register(UserDTO dto) {
+    public UserResponseDTO register(RegisterRequestDTO dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new CustomException("Email already exists");
+            throw new CustomException(HttpStatus.CONFLICT, "Email already exists");
         }
 
         User user = User.builder()
@@ -38,41 +45,54 @@ public class UserServiceImpl implements UserService {
                 .role(Role.USER)
                 .build();
 
-        userRepository.save(user);
-        return modelMapper.map(user, UserDTO.class);
+        User saved = userRepository.save(user);
+        return toResponse(saved);
     }
 
     @Override
-    public UserDTO getProfile(String email) {
+    public UserResponseDTO getProfile(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("User not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
 
-        return modelMapper.map(user, UserDTO.class);
+        return toResponse(user);
     }
 
     @Override
-    public UserDTO updateProfile(String email, UserDTO dto) {
+    public UserResponseDTO updateProfile(String email, ProfileUpdateDTO dto) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("User not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if(dto.getUsername() != null) user.setUsername(dto.getUsername());
-        if(dto.getEmail() != null) user.setEmail(dto.getEmail());
-        if(dto.getPassword() != null) user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            if (!dto.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(dto.getEmail())) {
+                throw new CustomException(HttpStatus.CONFLICT, "Email already exists");
+            }
+            user.setEmail(dto.getEmail());
+        }
 
-        userRepository.save(user);
-        return modelMapper.map(user, UserDTO.class);
+        if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
+            user.setUsername(dto.getUsername());
+        }
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        User saved = userRepository.save(user);
+        return toResponse(saved);
     }
 
     @Override
     public void deleteProfile(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException("User not found"));
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
         userRepository.delete(user);
     }
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        List<User> users = userRepository.findAll();
-        return users.stream().map(u -> modelMapper.map(u, UserDTO.class)).collect(Collectors.toList());
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 }

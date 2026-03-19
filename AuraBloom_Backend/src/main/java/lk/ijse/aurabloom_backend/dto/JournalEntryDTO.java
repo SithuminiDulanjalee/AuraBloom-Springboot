@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 public class JournalEntryDTO {
 
+    private Long id;
     @NotBlank(message = "Title is required")
     private String title;
 

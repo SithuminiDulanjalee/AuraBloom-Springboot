@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @Builder
 public class MeditationSessionDTO {
 
+    private Long id;
     @NotBlank(message = "Title cannot be blank")
     private String title;
 
