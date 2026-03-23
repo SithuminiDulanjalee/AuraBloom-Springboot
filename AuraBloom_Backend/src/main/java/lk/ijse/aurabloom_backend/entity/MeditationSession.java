@@ -18,15 +18,19 @@ public class MeditationSession {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
 
+    @Column(nullable = false)
     private int duration;
 
+    @Column(nullable = false)
     private LocalDate sessionDate;
 
+    @Column(length = 1000)
     private String notes;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

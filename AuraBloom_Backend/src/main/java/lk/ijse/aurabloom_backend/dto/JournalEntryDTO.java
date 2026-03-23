@@ -1,5 +1,6 @@
 package lk.ijse.aurabloom_backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -25,5 +26,6 @@ public class JournalEntryDTO {
 
     private List<String> tags;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate createdDate;
 }
