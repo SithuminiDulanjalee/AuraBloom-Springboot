@@ -26,10 +26,10 @@
 <div class="max-w-[1600px] mx-auto">
     <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
         <div class="flex items-center gap-4">
-            <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg">
-                <span class="text-3xl">🌸</span>
+            <div class="w-24 h-24 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg mb-8">
+                <span class="text-5xl animate-bounce">😃</span>
             </div>
-            <h1 class="text-3xl font-extrabold tracking-tighter dark:text-white">AuraBloom</h1>
+            <h1 class="text-3xl font-extrabold tracking-tighter dark:text-white">AuraBloom <span class="text-emerald-500">Mood</span></h1>
         </div>
         <div class="flex items-center gap-3 glass-morph p-2 pr-6">
             <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-slate-800 shadow-sm transition hover:scale-110">
@@ -40,6 +40,7 @@
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Status</p>
                 <p class="text-sm font-extrabold text-emerald-500">Mood Center</p>
             </div>
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-10 h-10 rounded-xl ml-4" alt="User Profile">
         </div>
     </header>
 
@@ -132,12 +133,18 @@
 </div>
 
 <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-fit">
-    <div class="flex items-center gap-4 px-6 py-4 glass-morph shadow-2xl overflow-x-auto no-scrollbar">
-        <button onclick="location.href='dashboard.html'" class="text-2xl opacity-50 hover:opacity-100">🏠</button>
-        <button onclick="location.href='mood.html'" class="text-2xl scale-125">✍️</button>
-        <button onclick="location.href='meditation.html'" class="text-2xl opacity-50">🧘</button>
-        <button onclick="location.href='stats.html'" class="text-2xl opacity-50">📈</button>
-        <button onclick="location.href='settings.html'" class="text-2xl opacity-50">⚙️</button>
+    <div class="flex items-center gap-4 px-6 py-4 glass-morph shadow-2xl overflow-x-auto no-scrollbar scroll-smooth">
+        <button onclick="window.location.href='userdashboard.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Home">🏠</button>
+        <button onclick="window.location.href='mood.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Mood">😃</button>
+        <button onclick="window.location.href='journal.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Journal">✍️</button>
+        <button onclick="window.location.href='meditation.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Meditation">🧘</button>
+        <button onclick="window.location.href='dailychallenges.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Daily Challenges">🏆</button>
+        <button onclick="window.location.href='badge.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Achievements">🎖️</button>
+        <button onclick="window.location.href='timecapsule.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Time Capsule">⏳</button>
+        <button onclick="window.location.href='community.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Community">🤝</button>
+        <button onclick="window.location.href='riskengine.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Risk Engine">🧠</button>
+        <button onclick="window.location.href='profile.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Profile">👤</button>
+        <button onclick="window.location.href='settings.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Settings">⚙️</button>
     </div>
 </nav>
 

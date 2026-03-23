@@ -72,13 +72,12 @@
             </div>
             <h1 class="text-3xl font-extrabold tracking-tighter dark:text-white">AuraBloom</h1>
         </div>
-
         <div class="flex items-center gap-3 glass-morph p-2 pr-6">
             <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-slate-800 shadow-sm transition hover:scale-110">
                 <span id="theme-icon">🌙</span>
             </button>
             <div class="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
-            <div class="text-right hidden sm:block">
+            <div class="text-right">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Status</p>
                 <p class="text-sm font-extrabold text-emerald-500">Perfectly Balanced</p>
             </div>
@@ -92,7 +91,7 @@
             <div class="relative z-10">
                 <span class="px-4 py-1 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-widest">Core Insight</span>
                 <h2 class="text-4xl md:text-5xl font-black mt-6 mb-4 dark:text-white leading-tight">
-                    How is your<span id="user-span" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500"> Aura</span> glowing <br>today?
+                    How is <span id="user-span" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-pink-500"> Aura</span> glowing <br>today?
                 </h2>
 
                 <div class="flex flex-wrap gap-4 mt-10" id="mood-picker">
@@ -130,12 +129,12 @@
                 <p class="text-xs text-slate-400 mt-4 leading-relaxed">No depressive triggers detected in recent journal polarity. Well done.</p>
             </div>
 
-            <div class="glass-morph p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-500/20">
-                <p class="text-[10px] font-bold uppercase opacity-70">Today's Bloom</p>
-                <h4 class="text-xl font-bold mt-2">Mindful Breath (5m)</h4>
-                <p class="text-sm opacity-80 mt-2">Earn 50 Energy Points to unlock the 'Zen Master' badge.</p>
-                <button class="mt-6 w-full py-3 bg-white/20 hover:bg-white/30 rounded-xl font-bold transition">Start Now</button>
-            </div>
+<!--            <div class="glass-morph p-8 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-500/20">-->
+<!--                <p class="text-[10px] font-bold uppercase opacity-70">Today's Bloom</p>-->
+<!--                <h4 class="text-xl font-bold mt-2">Mindful Breath (5m)</h4>-->
+<!--                <p class="text-sm opacity-80 mt-2">Earn 50 Energy Points to unlock the 'Zen Master' badge.</p>-->
+<!--                <button class="mt-6 w-full py-3 bg-white/20 hover:bg-white/30 rounded-xl font-bold transition">Start Now</button>-->
+<!--            </div>-->
         </div>
 
         <!--        <div class="col-span-12 md:col-span-6 glass-morph p-8">-->
@@ -173,13 +172,16 @@
 
 <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-fit">
     <div class="flex items-center gap-4 px-6 py-4 glass-morph shadow-2xl overflow-x-auto no-scrollbar scroll-smooth">
-        <button onclick="window.location.href='new.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Home">🏠</button>
+        <button onclick="window.location.href='userdashboard.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Home">🏠</button>
+        <button onclick="window.location.href='mood.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Mood">😃</button>
         <button onclick="window.location.href='journal.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Journal">✍️</button>
         <button onclick="window.location.href='meditation.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Meditation">🧘</button>
-
+        <button onclick="window.location.href='dailychallenges.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Daily Challenges">🏆</button>
+        <button onclick="window.location.href='badge.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Achievements">🎖️</button>
+        <button onclick="window.location.href='timecapsule.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Time Capsule">⏳</button>
+        <button onclick="window.location.href='community.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Community">🤝</button>
+        <button onclick="window.location.href='riskengine.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Risk Engine">🧠</button>
         <button onclick="window.location.href='profile.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Profile">👤</button>
-        <button onclick="window.location.href='stats.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Stats">📈</button>
-        <button onclick="window.location.href='community.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Circle">🌐</button>
         <button onclick="window.location.href='settings.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Settings">⚙️</button>
     </div>
 </nav>
