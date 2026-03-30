@@ -2,7 +2,7 @@ package lk.ijse.aurabloom_backend.controller;
 
 import jakarta.validation.Valid;
 import lk.ijse.aurabloom_backend.dto.JournalEntryDTO;
-import lk.ijse.aurabloom_backend.service.custom.impl.JournalServiceImpl;
+import lk.ijse.aurabloom_backend.service.custom.JournalService;
 import lk.ijse.aurabloom_backend.util.APIResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ import java.util.Map;
 @PreAuthorize("hasRole('USER')")
 public class JournalController {
 
-    private final JournalServiceImpl journalService;
+    private final JournalService journalService;
 
     @PostMapping
     public ResponseEntity<APIResponse<JournalEntryDTO>> createEntry(

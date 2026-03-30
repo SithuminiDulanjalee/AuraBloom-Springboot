@@ -3,7 +3,7 @@ package lk.ijse.aurabloom_backend.controller;
 import jakarta.validation.Valid;
 import lk.ijse.aurabloom_backend.dto.ProfileUpdateDTO;
 import lk.ijse.aurabloom_backend.dto.UserResponseDTO;
-import lk.ijse.aurabloom_backend.service.custom.impl.UserServiceImpl;
+import lk.ijse.aurabloom_backend.service.custom.UserService;
 import lk.ijse.aurabloom_backend.util.APIResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class UserController {
 
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")

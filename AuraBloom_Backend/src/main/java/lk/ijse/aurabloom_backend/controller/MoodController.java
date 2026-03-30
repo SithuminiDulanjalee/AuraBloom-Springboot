@@ -3,7 +3,7 @@ package lk.ijse.aurabloom_backend.controller;
 import jakarta.validation.Valid;
 import lk.ijse.aurabloom_backend.dto.MoodEntryDTO;
 import lk.ijse.aurabloom_backend.dto.MoodTrendDTO;
-import lk.ijse.aurabloom_backend.service.custom.impl.MoodServiceImpl;
+import lk.ijse.aurabloom_backend.service.custom.MoodService;
 import lk.ijse.aurabloom_backend.util.APIResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ import java.util.List;
 @PreAuthorize("hasRole('USER')")
 public class MoodController {
 
-    private final MoodServiceImpl moodService;
+    private final MoodService moodService;
 
     @PostMapping
     public ResponseEntity<APIResponse<MoodEntryDTO>> createMood(

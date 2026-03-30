@@ -5,8 +5,8 @@ import lk.ijse.aurabloom_backend.dto.AuthResponseDTO;
 import lk.ijse.aurabloom_backend.dto.LoginRequestDTO;
 import lk.ijse.aurabloom_backend.dto.RegisterRequestDTO;
 import lk.ijse.aurabloom_backend.dto.UserResponseDTO;
-import lk.ijse.aurabloom_backend.service.custom.impl.AuthServiceImpl;
-import lk.ijse.aurabloom_backend.service.custom.impl.UserServiceImpl;
+import lk.ijse.aurabloom_backend.service.custom.UserService;
+import lk.ijse.aurabloom_backend.service.custom.AuthService;
 import lk.ijse.aurabloom_backend.util.APIResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 public class AuthController {
 
-    private final UserServiceImpl userService;
-    private final AuthServiceImpl authService;
+    private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<APIResponse<UserResponseDTO>> register(@Valid @RequestBody RegisterRequestDTO dto) {

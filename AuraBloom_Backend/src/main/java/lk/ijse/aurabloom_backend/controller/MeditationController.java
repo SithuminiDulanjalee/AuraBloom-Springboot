@@ -2,7 +2,7 @@ package lk.ijse.aurabloom_backend.controller;
 
 import jakarta.validation.Valid;
 import lk.ijse.aurabloom_backend.dto.MeditationSessionDTO;
-import lk.ijse.aurabloom_backend.service.custom.impl.MeditationServiceImpl;
+import lk.ijse.aurabloom_backend.service.custom.MeditationService;
 import lk.ijse.aurabloom_backend.util.APIResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ import java.util.List;
 @PreAuthorize("hasRole('USER')")
 public class MeditationController {
 
-    private final MeditationServiceImpl meditationService;
+    private final MeditationService meditationService;
 
     @PostMapping
     public ResponseEntity<APIResponse<MeditationSessionDTO>> createSession(
