@@ -5,6 +5,7 @@ import lk.ijse.aurabloom_backend.entity.MeditationSession;
 import lk.ijse.aurabloom_backend.entity.User;
 import lk.ijse.aurabloom_backend.repository.MeditationSessionRepository;
 import lk.ijse.aurabloom_backend.repository.UserRepository;
+import lk.ijse.aurabloom_backend.service.custom.BadgeService;
 import lk.ijse.aurabloom_backend.service.custom.MeditationService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -21,6 +22,7 @@ public class MeditationServiceImpl implements MeditationService {
 
     private final MeditationSessionRepository meditationRepo;
     private final UserRepository userRepository;
+    private final BadgeService badgeService;
     @Autowired
     private final ModelMapper modelMapper;
 
@@ -39,6 +41,7 @@ public class MeditationServiceImpl implements MeditationService {
         session.setUser(user);
 
         MeditationSession saved = meditationRepo.save(session);
+        badgeService.evaluateMeditationBadges(email);
 
         return modelMapper.map(saved, MeditationSessionDTO.class);
     }

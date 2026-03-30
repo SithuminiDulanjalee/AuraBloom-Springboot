@@ -6,6 +6,7 @@ import lk.ijse.aurabloom_backend.entity.MoodType;
 import lk.ijse.aurabloom_backend.entity.User;
 import lk.ijse.aurabloom_backend.repository.JournalEntryRepository;
 import lk.ijse.aurabloom_backend.repository.UserRepository;
+import lk.ijse.aurabloom_backend.service.custom.BadgeService;
 import lk.ijse.aurabloom_backend.service.custom.JournalService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -24,6 +25,7 @@ public class JournalServiceImpl implements JournalService {
 
     private final JournalEntryRepository journalEntryRepository;
     private final UserRepository userRepository;
+    private final BadgeService badgeService;
     @Autowired
     private final ModelMapper modelMapper;
 
@@ -43,6 +45,7 @@ public class JournalServiceImpl implements JournalService {
                 .build();
 
         JournalEntry saved = journalEntryRepository.save(entry);
+        badgeService.evaluateJournalBadges(email);
 
         return modelMapper.map(saved, JournalEntryDTO.class);
     }

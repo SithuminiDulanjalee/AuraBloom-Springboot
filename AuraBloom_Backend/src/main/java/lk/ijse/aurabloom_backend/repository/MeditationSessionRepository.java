@@ -16,4 +16,6 @@ public interface MeditationSessionRepository extends JpaRepository<MeditationSes
             LocalDate start,
             LocalDate end
     );
+
+    long countByUser(User user);
 }

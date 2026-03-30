@@ -8,6 +8,7 @@ import lk.ijse.aurabloom_backend.entity.User;
 import lk.ijse.aurabloom_backend.exception.CustomException;
 import lk.ijse.aurabloom_backend.repository.MoodEntryRepository;
 import lk.ijse.aurabloom_backend.repository.UserRepository;
+import lk.ijse.aurabloom_backend.service.custom.BadgeService;
 import lk.ijse.aurabloom_backend.service.custom.MoodService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -23,6 +24,7 @@ public class MoodServiceImpl implements MoodService {
 
     private final MoodEntryRepository moodEntryRepository;
     private final UserRepository userRepository;
+    private final BadgeService badgeService;
     private final ModelMapper modelMapper;
 
     private MoodEntryDTO toDTO(MoodEntry entry) {
@@ -59,6 +61,7 @@ public class MoodServiceImpl implements MoodService {
         entry.setUser(user);
 
         MoodEntry saved = moodEntryRepository.save(entry);
+        badgeService.evaluateMoodBadges(email);
         return toDTO(saved);
     }
 

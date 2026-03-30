@@ -12,4 +12,6 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
     List<JournalEntry> findByUser(User user);
 
     List<JournalEntry> findByUserAndCreatedDateAfter(User user, LocalDate afterDate);
+
+    long countByUser(User user);
 }

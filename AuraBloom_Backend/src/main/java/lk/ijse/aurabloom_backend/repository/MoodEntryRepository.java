@@ -14,4 +14,6 @@ public interface MoodEntryRepository extends JpaRepository<MoodEntry, Long> {
     List<MoodEntry> findByUserAndCreatedDateBetween(User user, LocalDate start, LocalDate end);
 
     List<MoodEntry> findByUserAndCreatedDateAfter(User user, LocalDate after);
+
+    long countByUser(User user);
 }

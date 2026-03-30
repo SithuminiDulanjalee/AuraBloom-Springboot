@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraBloom | Daily Challenges</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; transition: background 0.5s ease; }
+    .dark body { background: #020617; }
+    .aura-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15), transparent 50%); z-index: -1; pointer-events: none; }
+    .glass-morph { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 2rem; }
+    .dark .glass-morph { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .active-glow { box-shadow: 0 0 30px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); }
+    .challenge-card.completed { opacity: 0.7; transform: scale(0.985); border-color: rgba(16, 185, 129, 0.5); background: rgba(16, 185, 129, 0.06); }
+    .dark .challenge-card.completed { background: rgba(16, 185, 129, 0.1); }
+  </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 lg:p-12 overflow-x-hidden pb-40">
+<div class="aura-bg"></div>
+
+<div class="max-w-[1600px] mx-auto">
+  <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+    <div class="flex items-center gap-4">
+      <div class="w-24 h-24 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg mb-8">
+        <span class="text-5xl animate-bounce" style="animation-duration: 3s;">🎯</span>
+      </div>
+      <h1 class="text-3xl font-extrabold tracking-tighter dark:text-white">AuraBloom <span class="text-emerald-500">Quests</span></h1>
+    </div>
+
+    <div class="flex items-center gap-3 glass-morph p-2 pr-6">
+      <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-slate-800 shadow-sm transition hover:scale-110">
+        <span id="theme-icon">🌙</span>
+      </button>
+      <div class="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
+      <div class="text-right">
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Status</p>
+        <p class="text-sm font-extrabold text-emerald-500">Daily Challenge</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="grid grid-cols-12 gap-8">
+    <div class="col-span-12 lg:col-span-4 space-y-6">
+      <div class="glass-morph p-8 active-glow text-center">
+        <h2 class="text-xl font-black mb-2 dark:text-white">Today's Progress</h2>
+        <p class="text-xs text-slate-400 font-bold tracking-widest uppercase mb-8" id="current-date">...</p>
+
+        <div class="relative w-48 h-48 mx-auto flex items-center justify-center">
+          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="8" class="text-slate-200 dark:text-slate-800"></circle>
+            <circle id="progress-ring" cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="8"
+                    stroke-dasharray="283" stroke-dashoffset="283" stroke-linecap="round"
+                    class="text-emerald-500 transition-all duration-1000 ease-out"></circle>
+          </svg>
+          <div class="absolute flex flex-col items-center">
+            <span id="progress-text" class="text-4xl font-black dark:text-white">0%</span>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Completed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="glass-morph p-6 flex flex-col items-center justify-center text-center">
+          <span class="text-3xl mb-2">🔥</span>
+          <span id="streak-days" class="text-3xl font-black dark:text-white">12</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Day Streak</span>
+        </div>
+        <div class="glass-morph p-6 flex flex-col items-center justify-center text-center">
+          <span class="text-3xl mb-2">✨</span>
+          <span id="aura-points" class="text-3xl font-black text-emerald-500">0</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Aura Points</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-span-12 lg:col-span-8">
+      <div class="glass-morph p-8 min-h-[600px]">
+        <div class="flex justify-between items-center mb-8 gap-4">
+          <div>
+            <h2 class="text-2xl font-black dark:text-white leading-tight">Your Daily Tasks</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Complete these to grow your aura.</p>
+          </div>
+          <span id="remaining-count" class="px-4 py-1 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full text-[10px] font-bold uppercase tracking-widest">0 Remaining</span>
+        </div>
+
+        <div id="challenges-container" class="space-y-4"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-fit">
+  <div class="flex items-center gap-4 px-6 py-4 glass-morph shadow-2xl overflow-x-auto no-scrollbar scroll-smooth">
+    <button onclick="window.location.href='userdashboard.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Home">🏠</button>
+    <button onclick="window.location.href='mood.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Mood">😃</button>
+    <button onclick="window.location.href='journal.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Journal">✍️</button>
+    <button onclick="window.location.href='meditation.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Meditation">🧘</button>
+    <button onclick="window.location.href='dailychallenges.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Daily Challenges">🏆</button>
+    <button onclick="window.location.href='badge.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Achievements">🎖️</button>
+    <button onclick="window.location.href='timecapsule.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Time Capsule">⏳</button>
+    <button onclick="window.location.href='community.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Community">🤝</button>
+    <button onclick="window.location.href='riskengine.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Risk Engine">🧠</button>
+    <button onclick="window.location.href='profile.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Profile">👤</button>
+    <button onclick="window.location.href='settings.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Settings">⚙️</button>
+  </div>
+</nav>
+
+<script>
+  const API_URL = "http://localhost:8080/api/daily-challenges";
+  const AUTH_TOKEN = localStorage.getItem('token');
+
+  let challengeCache = [];
+  let totalPoints = 0;
+
+  function authHeaders() {
+    return { Authorization: `Bearer ${AUTH_TOKEN}` };
+  }
+
+  function todayText() {
+    const options = { weekday: 'long', month: 'long', day: 'numeric' };
+    return new Date().toLocaleDateString('en-US', options);
+  }
+
+  function initTheme() {
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.classList.add('dark');
+      $('#theme-icon').text('☀️');
+    } else {
+      $('#theme-icon').text('🌙');
+    }
+  }
+
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    $('#theme-icon').text(isDark ? '☀️' : '🌙');
+  }
+
+  function ensureAuth() {
+    if (!AUTH_TOKEN) {
+      window.location.href = "sign-in.html";
+      return false;
+    }
+    return true;
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+  }
+
+  function loadTodayChallenges() {
+    $.ajax({
+      url: `${API_URL}/today`,
+      headers: authHeaders(),
+      success: (res) => {
+        challengeCache = res.data || [];
+        renderChallenges();
+        updateProgress();
+      },
+      error: (xhr) => {
+        if (xhr.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = "sign-in.html";
+        }
+      }
+    });
+  }
+
+  function renderChallenges() {
+    totalPoints = 0;
+    const completedCount = challengeCache.filter(c => c.completed).length;
+    const container = $('#challenges-container');
+
+    container.empty();
+
+    challengeCache.forEach(challenge => {
+      if (challenge.completed) totalPoints += Number(challenge.points || 0);
+
+      const completedClass = challenge.completed ? 'completed' : '';
+      const buttonHTML = challenge.completed
+              ? `<button class="px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold">Completed</button>`
+              : `<button onclick="completeChallenge(${challenge.id})" class="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:scale-105 transition">Complete</button>`;
+
+      const cardHTML = `
+        <div class="challenge-card ${completedClass} glass-morph p-6 flex items-center gap-6 transition-all duration-300 hover:shadow-lg dark:hover:bg-slate-800/50">
+          <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-white/60 dark:bg-slate-900/50 shrink-0">
+            ${getIcon(challenge.challengeType)}
+          </div>
+
+          <div class="flex-1">
+            <h3 class="font-bold text-lg dark:text-white">${escapeHtml(challenge.title)}</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">${escapeHtml(challenge.description)}</p>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+              ${escapeHtml(challenge.challengeDate || '')}
+            </p>
+          </div>
+
+          <div class="text-right shrink-0 flex flex-col items-end gap-3">
+            <span class="text-xs font-bold text-emerald-500 bg-emerald-100 dark:bg-emerald-900/30 px-3 py-1 rounded-full">+${Number(challenge.points || 0)} AP</span>
+            ${buttonHTML}
+          </div>
+        </div>
+      `;
+      container.append(cardHTML);
+    });
+
+    $('#remaining-count').text(`${challengeCache.length - completedCount} Remaining`);
+    $('#aura-points').text(totalPoints);
+  }
+
+  function completeChallenge(id) {
+    $.ajax({
+      url: `${API_URL}/${id}/complete`,
+      method: 'PUT',
+      headers: authHeaders(),
+      success: () => {
+        loadTodayChallenges();
+      },
+      error: (xhr) => {
+        alert(xhr.responseJSON?.message || "Failed to complete challenge");
+      }
+    });
+  }
+
+  function updateProgress() {
+    const total = challengeCache.length || 1;
+    const completed = challengeCache.filter(c => c.completed).length;
+    const percentage = Math.round((completed / total) * 100);
+
+    $('#progress-text').text(`${percentage}%`);
+    $('#progress-ring').css('stroke-dashoffset', 283 - (283 * percentage) / 100);
+  }
+
+  function getIcon(type) {
+    const map = {
+      MOOD: '🌸',
+      MEDITATION: '🧘',
+      JOURNAL: '✍️',
+      GENERAL: '🎯'
+    };
+    return map[type] || '✨';
+  }
+
+  $(document).ready(() => {
+    if (!ensureAuth()) return;
+    $('#current-date').text(todayText());
+    initTheme();
+    loadTodayChallenges();
+  });
+</script>
+</body>
+</html>
