@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraBloom | Risk Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; transition: background 0.5s ease; }
+        .dark body { background: #020617; }
+        .aura-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 50% 50%, rgba(139,92,246,0.15), transparent 50%);
+            z-index: -1; pointer-events: none; }
+        .glass-morph { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.4); border-radius: 2rem; }
+        .dark .glass-morph { background: rgba(15,23,42,0.8); border: 1px solid rgba(255,255,255,0.05); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .active-glow { box-shadow: 0 0 30px rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.4); }
+        .ring-transition { transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1); }
+        @keyframes typing { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+        .dot { animation: typing 1s infinite; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .chat-bubble-ai { border-bottom-left-radius: 4px; }
+        .chat-bubble-user { border-bottom-right-radius: 4px; }
+    </style>
+</head>
+<body class="p-4 md:p-8 lg:p-12 overflow-x-hidden pb-32">
+<div class="aura-bg"></div>
+
+<div class="max-w-[1600px] mx-auto">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+        <div class="flex items-center gap-4">
+            <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg">
+                <span class="text-4xl">🧠</span>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tighter dark:text-white">
+                    AuraBloom <span class="text-violet-500">Risk Engine</span>
+                </h1>
+                <p class="text-sm text-slate-400 font-medium">AI-powered emotional wellness intelligence</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 glass-morph p-2 pr-6">
+            <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-slate-800 shadow-sm transition hover:scale-110">
+                <span id="theme-icon">🌙</span>
+            </button>
+            <div class="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Bloom AI</p>
+                <p id="ai-status" class="text-sm font-extrabold text-emerald-500">Loading...</p>
+            </div>
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" class="w-10 h-10 rounded-xl ml-4" alt="User Profile">
+        </div>
+    </header>
+
+    <div class="grid grid-cols-12 gap-8">
+
+        <div class="col-span-12 lg:col-span-4 space-y-6">
+
+            <div class="glass-morph p-8 active-glow text-center">
+                <h2 class="text-xl font-black mb-2 dark:text-white">Burnout Risk Index</h2>
+                <div class="relative w-48 h-48 mx-auto flex items-center justify-center mb-4 mt-6">
+                    <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="8" class="text-slate-200 dark:text-slate-800"/>
+                        <circle id="risk-ring" cx="50" cy="50" r="45" fill="none" stroke="currentColor"
+                                stroke-width="8" stroke-dasharray="283" stroke-dashoffset="283"
+                                stroke-linecap="round" class="text-violet-500 ring-transition"/>
+                    </svg>
+                    <div class="absolute flex flex-col items-center">
+                        <span id="risk-pct" class="text-4xl font-black dark:text-white">—</span>
+                        <span id="risk-label" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Loading</span>
+                    </div>
+                </div>
+                <p id="risk-desc" class="text-sm text-slate-500 dark:text-slate-400 font-medium px-4">
+                    Analysing your wellness data...
+                </p>
+            </div>
+
+            <div class="glass-morph p-6">
+                <h3 class="text-sm font-black dark:text-white uppercase tracking-widest mb-4">Weekly Mood Breakdown</h3>
+                <div id="mood-bars" class="space-y-3">
+                    <div class="text-xs text-slate-400">Loading mood data...</div>
+                </div>
+            </div>
+
+
+            <div class="glass-morph p-6">
+                <h3 class="text-sm font-black dark:text-white uppercase tracking-widest mb-4">Wellness Stats</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white/40 dark:bg-slate-800/40 rounded-2xl p-4 text-center">
+                        <p id="stat-moods" class="text-2xl font-black text-violet-500">—</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold mt-1">Mood Logs</p>
+                    </div>
+                    <div class="bg-white/40 dark:bg-slate-800/40 rounded-2xl p-4 text-center">
+                        <p id="stat-journals" class="text-2xl font-black text-violet-500">—</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold mt-1">Journals</p>
+                    </div>
+                    <div class="bg-white/40 dark:bg-slate-800/40 rounded-2xl p-4 text-center">
+                        <p id="stat-meditation" class="text-2xl font-black text-emerald-500">—</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold mt-1">Meditation min</p>
+                    </div>
+                    <div class="bg-white/40 dark:bg-slate-800/40 rounded-2xl p-4 text-center">
+                        <p id="stat-challenges" class="text-2xl font-black text-amber-500">—</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold mt-1">Challenges Done</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="glass-morph p-6">
+                <h3 class="text-sm font-black dark:text-white uppercase tracking-widest mb-4">
+                    Your Badges <span id="badge-count" class="text-violet-500"></span>
+                </h3>
+                <div id="badge-list" class="space-y-3">
+                    <div class="text-xs text-slate-400">Loading badges...</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-span-12 lg:col-span-8 space-y-8">
+
+
+            <div class="glass-morph p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-black dark:text-white">AI Insights</h2>
+                    <button onclick="loadReport()" class="text-xs font-bold text-violet-500 hover:underline">
+                        ↻ Refresh
+                    </button>
+                </div>
+                <div id="insights-container" class="space-y-4">
+                    <div class="text-sm text-slate-400 animate-pulse">Generating personalised insights...</div>
+                </div>
+            </div>
+
+
+            <div class="glass-morph overflow-hidden flex flex-col h-[520px] border-2 border-violet-500/20 shadow-2xl shadow-violet-500/10">
+                <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center gap-4 bg-white/30 dark:bg-slate-900/30">
+                    <div class="w-10 h-10 bg-violet-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-violet-500/30">✨</div>
+                    <div>
+                        <h3 class="font-black dark:text-white leading-none">Bloom AI</h3>
+                        <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest mt-1">Personalised to your data</p>
+                    </div>
+                </div>
+
+                <div id="chat-window" class="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar bg-white/10">
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-sm shrink-0">✨</div>
+                        <div class="max-w-[80%] bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm text-sm dark:text-slate-200 chat-bubble-ai">
+                            Hello! I've analysed your wellness data and I'm here to help. How are you feeling right now?
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md">
+
+                    <div class="flex gap-2 mb-3 overflow-x-auto no-scrollbar">
+                        <button onclick="quickSend('How can I reduce my stress?')"
+                                class="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-violet-100 transition font-medium">
+                            Reduce stress
+                        </button>
+                        <button onclick="quickSend('Give me a mood-boosting tip')"
+                                class="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-violet-100 transition font-medium">
+                            Mood boost
+                        </button>
+                        <button onclick="quickSend('What should I do today for my mental health?')"
+                                class="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-violet-100 transition font-medium">
+                            Today's plan
+                        </button>
+                        <button onclick="quickSend('Analyse my risk score and tell me what it means')"
+                                class="text-xs bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300 px-3 py-1.5 rounded-full whitespace-nowrap hover:bg-violet-100 transition font-medium">
+                            Explain my risk
+                        </button>
+                    </div>
+                    <div class="relative flex items-center">
+                        <input id="chat-input" type="text" placeholder="Share your thoughts..."
+                               class="w-full p-4 pr-16 rounded-2xl bg-white dark:bg-slate-800 dark:text-white outline-none border border-slate-100 dark:border-slate-700 focus:border-violet-400 transition shadow-inner"
+                               onkeydown="if(event.key==='Enter') sendMessage()">
+                        <button onclick="sendMessage()"
+                                class="absolute right-2 w-10 h-10 bg-violet-500 text-white rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition shadow-lg shadow-violet-500/30">
+                            🚀
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<nav class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-fit">
+    <div class="flex items-center gap-4 px-6 py-4 glass-morph shadow-2xl overflow-x-auto no-scrollbar scroll-smooth">
+        <button onclick="window.location.href='userdashboard.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Home">🏠</button>
+        <button onclick="window.location.href='mood.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Mood">😃</button>
+        <button onclick="window.location.href='journal.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Journal">✍️</button>
+        <button onclick="window.location.href='meditation.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Meditation">🧘</button>
+        <button onclick="window.location.href='dailychallenges.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Daily Challenges">🎯</button>
+        <button onclick="window.location.href='badge.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Achievements">🎖️</button>
+        <button onclick="window.location.href='timecapsule.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Time Capsule">⏳</button>
+        <button onclick="window.location.href='riskengine.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Risk Engine">🧠</button>
+        <button onclick="window.location.href='profile.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Profile">👤</button>
+        <button onclick="window.location.href='settings.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Settings">⚙️</button>
+    </div>
+</nav>
+
+<script>
+    const BASE = 'http://localhost:8080';
+    const token = localStorage.getItem('token');
+
+    const headers = () => ({
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+    });
+
+    const moodEmoji = {
+        HAPPY: '😊', SAD: '😢', STRESSED: '😰', CALM: '😌', ANXIOUS: '😟'
+    };
+    const moodColor = {
+        HAPPY: 'bg-emerald-400', SAD: 'bg-blue-400',
+        STRESSED: 'bg-red-400', CALM: 'bg-violet-400', ANXIOUS: 'bg-amber-400'
+    };
+    const insightIcons = ['📉', '🤝', '🧘', '📖', '⚡', '🌱'];
+
+    async function loadReport() {
+        try {
+            const res = await fetch(`${BASE}/api/risk/report`, { headers: headers() });
+            if (!res.ok) throw new Error('API error');
+            const json = await res.json();
+            const r = json.data;
+
+
+            const pct = Math.round(r.emotionalRiskScore);
+            const offset = 283 - (283 * pct) / 100;
+            setTimeout(() => $('#risk-ring').css('stroke-dashoffset', offset), 300);
+            $('#risk-pct').text(pct + '%');
+            $('#risk-label').text(r.riskLevel);
+            $('#risk-desc').text(riskDesc(r.riskLevel, pct));
+
+
+            const ringColour = { LOW:'#10b981', MODERATE:'#f59e0b', ELEVATED:'#8b5cf6', HIGH:'#ef4444' };
+            $('#risk-ring').css('color', ringColour[r.riskLevel] || '#8b5cf6');
+
+
+            $('#stat-moods').text(r.totalMoodEntries);
+            $('#stat-journals').text(r.totalJournalEntries);
+            $('#stat-meditation').text(r.totalMeditationMinutes);
+            $('#stat-challenges').text(r.completedChallengesCount);
+
+
+            renderMoodBars(r.moodDistribution);
+
+
+            renderInsights(r.aiInsights);
+
+            $('#ai-status').text('Connected').css('color', '#10b981');
+        } catch (e) {
+            $('#ai-status').text('Offline').css('color', '#ef4444');
+            renderInsights([
+                'Could not load insights. Check your connection.',
+                'Make sure your backend is running on port 8080.',
+                'Ensure your JWT token is valid.'
+            ]);
+            console.error(e);
+        }
+    }
+
+
+    async function loadBadges() {
+        try {
+            const res = await fetch(`${BASE}/api/badges`, { headers: headers() });
+            const json = await res.json();
+            const badges = json.data || [];
+            $('#badge-count').text('(' + badges.length + ')');
+            const container = $('#badge-list').empty();
+            if (badges.length === 0) {
+                container.append('<div class="text-xs text-slate-400">No badges yet — keep going!</div>');
+                return;
+            }
+            badges.forEach(b => {
+                container.append(`
+                <div class="flex items-center gap-3 p-3 rounded-2xl bg-white/40 dark:bg-slate-800/40">
+                    <div class="w-8 h-8 bg-violet-100 dark:bg-violet-900/40 rounded-xl flex items-center justify-center text-sm">🏅</div>
+                    <div>
+                        <p class="text-xs font-bold dark:text-white">${b.title}</p>
+                        <p class="text-[10px] text-slate-400">${b.awardedDate}</p>
+                    </div>
+                </div>
+            `);
+            });
+        } catch (e) {
+            $('#badge-list').html('<div class="text-xs text-slate-400">Could not load badges.</div>');
+        }
+    }
+
+
+    function renderMoodBars(dist) {
+        const total = Object.values(dist).reduce((a, b) => a + b, 0) || 1;
+        const container = $('#mood-bars').empty();
+        Object.entries(dist).forEach(([mood, count]) => {
+            const pct = Math.round((count / total) * 100);
+            container.append(`
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-xs font-bold dark:text-white">${moodEmoji[mood] || ''} ${mood}</span>
+                    <span class="text-[10px] text-slate-400">${count} entries</span>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-900/50 h-2.5 rounded-full overflow-hidden">
+                    <div class="${moodColor[mood] || 'bg-slate-400'} h-full rounded-full transition-all duration-700"
+                         style="width:${pct}%"></div>
+                </div>
+            </div>
+        `);
+        });
+    }
+
+    function renderInsights(insights) {
+        const container = $('#insights-container').empty();
+        if (!insights || insights.length === 0) {
+            container.append('<div class="text-sm text-slate-400">No insights available yet.</div>');
+            return;
+        }
+        insights.forEach((ins, i) => {
+            container.append(`
+            <div class="flex items-center gap-4 p-4 rounded-2xl bg-white/40 dark:bg-slate-800/40 border border-white/20 animate-fade-in">
+                <div class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-700 rounded-xl shadow-sm text-lg flex-shrink-0">
+                    ${insightIcons[i % insightIcons.length]}
+                </div>
+                <p class="text-sm dark:text-slate-200 font-medium">${ins}</p>
+            </div>
+        `);
+        });
+    }
+
+    function riskDesc(level, pct) {
+        const descs = {
+            LOW: 'Your emotional health looks balanced. Keep maintaining your routines!',
+            MODERATE: 'Some stress markers detected. Try a short meditation or journal entry.',
+            ELEVATED: 'Your data suggests mental fatigue is building. Consider a focus-break.',
+            HIGH: 'High emotional strain detected. Please prioritise self-care and reach out if needed.'
+        };
+        return descs[level] || 'Analysing your wellness patterns...';
+    }
+
+
+    async function sendMessage() {
+        const input = $('#chat-input');
+        const text = input.val().trim();
+        if (!text) return;
+
+        appendMessage('user', text);
+        input.val('');
+        const typingId = appendTypingIndicator();
+
+        try {
+            const res = await fetch(`${BASE}/api/ai/chat`, {
+                method: 'POST',
+                headers: headers(),
+                body: JSON.stringify({ message: text })
+            });
+            const json = await res.json();
+            $(`#${typingId}`).remove();
+            const reply = json.data?.reply || 'I had trouble processing that. Please try again.';
+            appendMessage('ai', reply);
+        } catch (e) {
+            $(`#${typingId}`).remove();
+            appendMessage('ai', 'Connection issue — please check if the backend is running.');
+        }
+    }
+
+    function quickSend(text) {
+        $('#chat-input').val(text);
+        sendMessage();
+    }
+
+    function appendMessage(role, text) {
+        const isAi = role === 'ai';
+        const html = `
+        <div class="flex ${isAi ? 'gap-3' : 'justify-end'} animate-fade-in">
+            ${isAi ? '<div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-sm shrink-0">✨</div>' : ''}
+            <div class="max-w-[80%] ${isAi
+            ? 'bg-white dark:bg-slate-800 chat-bubble-ai'
+            : 'bg-violet-500 text-white chat-bubble-user'} p-4 rounded-2xl shadow-sm text-sm dark:text-slate-200">
+                ${text}
+            </div>
+        </div>`;
+        $('#chat-window').append(html);
+        const win = $('#chat-window');
+        win.scrollTop(win[0].scrollHeight);
+    }
+
+    function appendTypingIndicator() {
+        const id = 'typing-' + Date.now();
+        const html = `
+        <div id="${id}" class="flex gap-3 animate-fade-in">
+            <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-sm shrink-0">✨</div>
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm flex gap-1">
+                <span class="w-1.5 h-1.5 bg-slate-400 rounded-full dot"></span>
+                <span class="w-1.5 h-1.5 bg-slate-400 rounded-full dot" style="animation-delay:.2s"></span>
+                <span class="w-1.5 h-1.5 bg-slate-400 rounded-full dot" style="animation-delay:.4s"></span>
+            </div>
+        </div>`;
+        $('#chat-window').append(html);
+        const win = $('#chat-window');
+        win.scrollTop(win[0].scrollHeight);
+        return id;
+    }
+
+
+    function toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        $('#theme-icon').text(isDark ? '☀️' : '🌙');
+    }
+
+
+    $(document).ready(() => {
+        if (!token) {
+            window.location.href = 'login.html';
+            return;
+        }
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            $('#theme-icon').text('☀️');
+        }
+        loadReport();
+        loadBadges();
+    });
+</script>
+</body>
+</html>
