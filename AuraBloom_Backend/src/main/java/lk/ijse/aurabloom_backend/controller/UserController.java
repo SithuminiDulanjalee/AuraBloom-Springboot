@@ -1,6 +1,8 @@
 package lk.ijse.aurabloom_backend.controller;
 
 import jakarta.validation.Valid;
+import lk.ijse.aurabloom_backend.dto.PasswordChangeDTO;
+import lk.ijse.aurabloom_backend.dto.ProfileResponseDTO;
 import lk.ijse.aurabloom_backend.dto.ProfileUpdateDTO;
 import lk.ijse.aurabloom_backend.dto.UserResponseDTO;
 import lk.ijse.aurabloom_backend.service.custom.UserService;
@@ -40,12 +42,23 @@ public class UserController {
     }
 
     @PutMapping("/profile")
-    public ResponseEntity<APIResponse<UserResponseDTO>> updateProfile(
+    public ResponseEntity<APIResponse<ProfileResponseDTO>> updateProfile(
             Principal principal,
-            @Valid @RequestBody ProfileUpdateDTO dto) {
+            @RequestBody ProfileUpdateDTO dto) {
 
         return new ResponseEntity<>(
                 new APIResponse<>(200, "Profile updated successfully", userService.updateProfile(principal.getName(), dto)),
+                HttpStatus.OK
+        );
+    }
+
+    @PutMapping("/profile/password")
+    public ResponseEntity<APIResponse<ProfileResponseDTO>> changePassword(
+            Principal principal,
+            @Valid @RequestBody PasswordChangeDTO dto) {
+
+        return new ResponseEntity<>(
+                new APIResponse<>(200, "Password updated successfully", userService.changePassword(principal.getName(), dto)),
                 HttpStatus.OK
         );
     }

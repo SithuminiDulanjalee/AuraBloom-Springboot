@@ -1,3 +1,4 @@
+
 package lk.ijse.aurabloom_backend.dto;
 
 import lombok.AllArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProfileUpdateDTO {
-    private String email;
-    private String username;
+public class ProfileResponseDTO {
+    private UserResponseDTO user;
+    private String token;
 }

@@ -1,5 +1,7 @@
 package lk.ijse.aurabloom_backend.service.custom.impl;
 
+import lk.ijse.aurabloom_backend.dto.PasswordChangeDTO;
+import lk.ijse.aurabloom_backend.dto.ProfileResponseDTO;
 import lk.ijse.aurabloom_backend.dto.ProfileUpdateDTO;
 import lk.ijse.aurabloom_backend.dto.RegisterRequestDTO;
 import lk.ijse.aurabloom_backend.dto.UserResponseDTO;
@@ -8,6 +10,7 @@ import lk.ijse.aurabloom_backend.entity.User;
 import lk.ijse.aurabloom_backend.exception.CustomException;
 import lk.ijse.aurabloom_backend.repository.UserRepository;
 import lk.ijse.aurabloom_backend.service.custom.UserService;
+import lk.ijse.aurabloom_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +25,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     private UserResponseDTO toResponse(User user) {
         return new UserResponseDTO(
@@ -58,7 +62,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO updateProfile(String email, ProfileUpdateDTO dto) {
+    public ProfileResponseDTO updateProfile(String email, ProfileUpdateDTO dto) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
 
@@ -66,19 +70,33 @@ public class UserServiceImpl implements UserService {
             if (!dto.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(dto.getEmail())) {
                 throw new CustomException(HttpStatus.CONFLICT, "Email already exists");
             }
-            user.setEmail(dto.getEmail());
+            user.setEmail(dto.getEmail().trim());
         }
 
         if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
-            user.setUsername(dto.getUsername());
-        }
-
-        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(dto.getPassword()));
+            user.setUsername(dto.getUsername().trim());
         }
 
         User saved = userRepository.save(user);
-        return toResponse(saved);
+        String newToken = jwtUtil.generateToken(saved);
+
+        return new ProfileResponseDTO(toResponse(saved), newToken);
+    }
+
+    @Override
+    public ProfileResponseDTO changePassword(String email, PasswordChangeDTO dto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new CustomException(HttpStatus.UNAUTHORIZED, "Current password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        User saved = userRepository.save(user);
+        String newToken = jwtUtil.generateToken(saved);
+
+        return new ProfileResponseDTO(toResponse(saved), newToken);
     }
 
     @Override
