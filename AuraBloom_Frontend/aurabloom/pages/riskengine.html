@@ -203,7 +203,7 @@
         <button onclick="window.location.href='timecapsule.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Time Capsule">⏳</button>
         <button onclick="window.location.href='riskengine.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Risk Engine">🧠</button>
         <button onclick="window.location.href='profile.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Profile">👤</button>
-        <button onclick="window.location.href='settings.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Settings">⚙️</button>
+        <button onclick="logout()" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Logout">🚪</button>
     </div>
 </nav>
 
@@ -429,6 +429,16 @@
         loadReport();
         loadBadges();
     });
+
+    function logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("role");
+
+        alert("Logged out successfully!");
+        window.location.href = "sign-in.html";
+    }
 </script>
 </body>
 </html>
