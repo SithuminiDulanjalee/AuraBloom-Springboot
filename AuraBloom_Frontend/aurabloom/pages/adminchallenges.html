@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraBloom | Admin Challenges</title>
+    <title>AuraBloom | Admin Daily Challenges</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
@@ -26,8 +26,11 @@
             <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg mb-4">
                 <span class="text-4xl">🛠️</span>
             </div>
-            <h1 class="text-3xl font-extrabold tracking-tighter dark:text-white">AuraBloom <span class="text-emerald-500">Admin Challenges</span></h1>
+            <h1 class="text-3xl font-extrabold tracking-tighter dark:text-white">
+                AuraBloom <span class="text-emerald-500">Admin Daily Challenges</span>
+            </h1>
         </div>
+
         <div class="flex items-center gap-3 glass-morph p-2 pr-6">
             <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-slate-800 shadow-sm transition hover:scale-110">
                 <span id="theme-icon">🌙</span>
@@ -44,15 +47,21 @@
         <div class="col-span-12 lg:col-span-4">
             <div class="glass-morph p-8">
                 <h2 class="text-2xl font-black dark:text-white mb-6">Challenge Form</h2>
-                <input type="hidden" id="template-id">
+                <input type="hidden" id="challenge-id">
 
                 <div class="space-y-4">
-                    <input id="title" type="text" placeholder="Title" class="w-full p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 dark:text-white outline-none">
-                    <textarea id="description" placeholder="Description" class="w-full p-4 h-36 rounded-2xl bg-white/50 dark:bg-slate-900/50 dark:text-white outline-none"></textarea>
+                    <input id="title" type="text" placeholder="Title"
+                           class="w-full p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 dark:text-white outline-none">
+
+                    <textarea id="description" placeholder="Description"
+                              class="w-full p-4 h-36 rounded-2xl bg-white/50 dark:bg-slate-900/50 dark:text-white outline-none"></textarea>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <input id="points" type="number" placeholder="Points" class="w-full p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 dark:text-white outline-none">
-                        <select id="challengeType" class="w-full p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 dark:text-white outline-none">
+                        <input id="points" type="number" placeholder="Points"
+                               class="w-full p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 dark:text-white outline-none">
+
+                        <select id="challengeType"
+                                class="w-full p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 dark:text-white outline-none">
                             <option value="MOOD">MOOD</option>
                             <option value="MEDITATION">MEDITATION</option>
                             <option value="JOURNAL">JOURNAL</option>
@@ -60,19 +69,31 @@
                         </select>
                     </div>
 
+                    <input id="challengeDate" type="date"
+                           class="w-full p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 dark:text-white outline-none">
+
                     <label class="flex items-center gap-3 text-sm dark:text-white">
                         <input id="active" type="checkbox" checked>
                         Active
                     </label>
 
                     <div class="flex gap-3">
-                        <button onclick="saveTemplate()" id="btn-save" class="flex-1 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black">Save</button>
+                        <button onclick="saveChallenge()" id="btn-save"
+                                class="flex-1 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black">
+                            Save
+                        </button>
                         <button onclick="resetForm()" class="px-6 py-4 bg-slate-200 dark:bg-slate-700 rounded-2xl">🔄</button>
                     </div>
 
                     <div id="edit-actions" class="hidden flex gap-3">
-                        <button onclick="updateTemplate()" class="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-black">Update</button>
-                        <button onclick="deleteTemplate()" class="flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black">Delete</button>
+                        <button onclick="updateChallenge()"
+                                class="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-black">
+                            Update
+                        </button>
+                        <button onclick="deleteChallenge()"
+                                class="flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black">
+                            Delete
+                        </button>
                     </div>
                 </div>
             </div>
@@ -81,15 +102,17 @@
         <div class="col-span-12 lg:col-span-8">
             <div class="glass-morph p-8">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-black dark:text-white">Challenge Templates</h2>
+                    <h2 class="text-2xl font-black dark:text-white">Challenge List</h2>
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Admin Managed</span>
                 </div>
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
                         <tr class="text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
                             <th class="pb-4">Title</th>
                             <th class="pb-4">Type</th>
+                            <th class="pb-4">Date</th>
                             <th class="pb-4">Points</th>
                             <th class="pb-4">Active</th>
                             <th class="pb-4 text-right">Action</th>
@@ -104,21 +127,27 @@
 </div>
 
 <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50">
-    <div class="flex items-center gap-2 px-5 py-3 glass shadow-2xl">
-        <button onclick="window.location.href='admindashboard.html'" class="text-2xl opacity-50 hover:opacity-100 transition-all" title="Admin Home">🛡️</button>
-        <button onclick="window.location.href='adminsecurity.html'" class="text-2xl opacity-50 hover:opacity-100 transition-all" title="Admin Profile">👥</button>
-        <button onclick="window.location.href='adminchallenges.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Admin Challenges">🎯</button>
-        <button onclick="logout()" class="text-xl p-2 rounded-xl opacity-50 hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 transition" title="Logout">🚪</button>
+    <div class="flex items-center gap-2 px-5 py-3 glass-morph shadow-2xl">
+        <button onclick="window.location.href='admindashboard.html'"
+                class="text-2xl opacity-50 hover:opacity-100 transition-all" title="Admin Home">🛡️</button>
+        <button onclick="window.location.href='adminsecurity.html'"
+                class="text-2xl opacity-50 hover:opacity-100 transition-all" title="Admin Profile">👥</button>
+        <button onclick="window.location.href='admindailychallenges.html'"
+                class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Admin Daily Challenges">🎯</button>
+        <button onclick="logout()"
+                class="text-xl p-2 rounded-xl opacity-50 hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 transition" title="Logout">🚪</button>
     </div>
 </nav>
 
 <script>
-    const API = "http://localhost:8080/api/admin/challenges";
+    const API = "http://localhost:8080/api/admin/daily-challenges";
     const AUTH_TOKEN = localStorage.getItem('token');
     let cache = [];
 
     function authHeaders() {
-        return { Authorization: `Bearer ${AUTH_TOKEN}` };
+        return {
+            Authorization: `Bearer ${AUTH_TOKEN}`
+        };
     }
 
     function ensureAuth() {
@@ -147,91 +176,139 @@
         }
     }
 
-    function loadTemplates() {
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
+    function formatDate(dateValue) {
+        if (!dateValue) return '';
+        const d = new Date(dateValue);
+        if (isNaN(d.getTime())) return dateValue;
+        return d.toLocaleDateString('en-GB');
+    }
+
+    function loadChallenges() {
         $.ajax({
             url: API,
             headers: authHeaders(),
             success: (res) => {
                 cache = res.data || [];
                 const rows = cache.map(t => `
-          <tr class="border-b border-slate-50 dark:border-slate-800/50 hover:bg-white/50 dark:hover:bg-slate-800/30 transition">
-            <td class="py-4 font-bold dark:text-white">${t.title}</td>
-            <td class="py-4">${t.challengeType}</td>
-            <td class="py-4">${t.points}</td>
-            <td class="py-4">${t.active ? 'Yes' : 'No'}</td>
-            <td class="py-4 text-right">
-              <button class="text-xs font-bold text-emerald-500 mr-3" onclick="editTemplate(${t.id})">Edit</button>
-              <button class="text-xs font-bold text-rose-500" onclick="deleteTemplateById(${t.id})">Delete</button>
-            </td>
-          </tr>
-        `).join('');
-                $('#table-body').html(rows || `<tr><td colspan="5" class="py-6 text-center text-slate-400">No templates yet</td></tr>`);
+                    <tr class="border-b border-slate-50 dark:border-slate-800/50 hover:bg-white/50 dark:hover:bg-slate-800/30 transition">
+                        <td class="py-4 font-bold dark:text-white">${escapeHtml(t.title)}</td>
+                        <td class="py-4">${escapeHtml(t.challengeType)}</td>
+                        <td class="py-4">${escapeHtml(t.challengeDate)}</td>
+                        <td class="py-4">${Number(t.points || 0)}</td>
+                        <td class="py-4">${t.active ? 'Yes' : 'No'}</td>
+                        <td class="py-4 text-right">
+                            <button class="text-xs font-bold text-emerald-500 mr-3" onclick="editChallenge(${t.id})">Edit</button>
+                            <button class="text-xs font-bold text-rose-500" onclick="deleteChallengeById(${t.id})">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+
+                $('#table-body').html(
+                    rows || `<tr><td colspan="6" class="py-6 text-center text-slate-400">No challenges yet</td></tr>`
+                );
+            },
+            error: (xhr) => {
+                alert(xhr.responseJSON?.message || "Failed to load challenges");
             }
         });
     }
 
-    function saveTemplate() {
-        const data = {
+    function validateForm() {
+        const title = $('#title').val().trim();
+        const description = $('#description').val().trim();
+        const points = $('#points').val();
+        const challengeType = $('#challengeType').val();
+        const challengeDate = $('#challengeDate').val();
+
+        if (!title || !description || !points || !challengeType || !challengeDate) {
+            alert("Please fill all fields.");
+            return false;
+        }
+        return true;
+    }
+
+    function buildPayload() {
+        return {
             title: $('#title').val().trim(),
             description: $('#description').val().trim(),
             points: parseInt($('#points').val(), 10),
             challengeType: $('#challengeType').val(),
+            challengeDate: $('#challengeDate').val(),
             active: $('#active').is(':checked')
         };
+    }
+
+    function saveChallenge() {
+        if (!validateForm()) return;
 
         $.ajax({
             url: API,
             method: 'POST',
             contentType: 'application/json',
             headers: authHeaders(),
-            data: JSON.stringify(data),
+            data: JSON.stringify(buildPayload()),
             success: () => {
                 resetForm();
-                loadTemplates();
+                loadChallenges();
+            },
+            error: (xhr) => {
+                alert(xhr.responseJSON?.message || "Failed to save challenge");
             }
         });
     }
 
-    function editTemplate(id) {
+    function editChallenge(id) {
         const t = cache.find(x => x.id === id);
         if (!t) return;
 
-        $('#template-id').val(t.id);
+        $('#challenge-id').val(t.id);
         $('#title').val(t.title);
         $('#description').val(t.description);
         $('#points').val(t.points);
         $('#challengeType').val(t.challengeType);
+        $('#challengeDate').val(t.challengeDate);
         $('#active').prop('checked', t.active);
 
         $('#btn-save').addClass('hidden');
         $('#edit-actions').removeClass('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function updateTemplate() {
-        const id = $('#template-id').val();
-        const data = {
-            title: $('#title').val().trim(),
-            description: $('#description').val().trim(),
-            points: parseInt($('#points').val(), 10),
-            challengeType: $('#challengeType').val(),
-            active: $('#active').is(':checked')
-        };
+    function updateChallenge() {
+        const id = $('#challenge-id').val();
+        if (!id) {
+            alert("No challenge selected.");
+            return;
+        }
+        if (!validateForm()) return;
 
         $.ajax({
             url: `${API}/${id}`,
             method: 'PUT',
             contentType: 'application/json',
             headers: authHeaders(),
-            data: JSON.stringify(data),
+            data: JSON.stringify(buildPayload()),
             success: () => {
                 resetForm();
-                loadTemplates();
+                loadChallenges();
+            },
+            error: (xhr) => {
+                alert(xhr.responseJSON?.message || "Failed to update challenge");
             }
         });
     }
 
-    function deleteTemplateById(id) {
-        if (!confirm("Delete this challenge template?")) return;
+    function deleteChallengeById(id) {
+        if (!confirm("Delete this challenge?")) return;
 
         $.ajax({
             url: `${API}/${id}`,
@@ -239,25 +316,30 @@
             headers: authHeaders(),
             success: () => {
                 resetForm();
-                loadTemplates();
+                loadChallenges();
+            },
+            error: (xhr) => {
+                alert(xhr.responseJSON?.message || "Failed to delete challenge");
             }
         });
     }
 
-    function deleteTemplate() {
-        deleteTemplateById($('#template-id').val());
+    function deleteChallenge() {
+        deleteChallengeById($('#challenge-id').val());
     }
 
     function resetForm() {
-        $('#template-id').val('');
+        $('#challenge-id').val('');
         $('#title').val('');
         $('#description').val('');
         $('#points').val('');
         $('#challengeType').val('MOOD');
+        $('#challengeDate').val('');
         $('#active').prop('checked', true);
         $('#btn-save').removeClass('hidden');
         $('#edit-actions').addClass('hidden');
     }
+
     function logout() {
         localStorage.removeItem("token");
         localStorage.removeItem("username");
@@ -271,7 +353,7 @@
     $(document).ready(() => {
         if (!ensureAuth()) return;
         initTheme();
-        loadTemplates();
+        loadChallenges();
     });
 </script>
 </body>
