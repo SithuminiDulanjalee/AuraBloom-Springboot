@@ -71,4 +71,12 @@ public class UserController {
                 HttpStatus.OK
         );
     }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<APIResponse<String>> deleteUserById(@PathVariable Long id) {
+        userService.deleteUserById(id);
+        return new ResponseEntity<>(new APIResponse<>(200, "User deleted", null), HttpStatus.OK);
+    }
+
 }

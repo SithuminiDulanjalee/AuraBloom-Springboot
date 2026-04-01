@@ -15,4 +15,5 @@ public interface UserService {
     ProfileResponseDTO changePassword(String email, PasswordChangeDTO dto);
     void deleteProfile(String email);
     List<UserResponseDTO> getAllUsers();
+    void deleteUserById(Long id);
 }

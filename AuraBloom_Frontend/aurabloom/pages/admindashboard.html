@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraBloom | Admin Nexus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f1f5f9; transition: background 0.4s ease; }
+        .dark body { background: #020617; }
+
+        .aura-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 20% 30%, rgba(139,92,246,0.08), transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(99,102,241,0.06), transparent 50%);
+            z-index: -1; pointer-events: none;
+        }
+        .dark .aura-bg {
+            background: radial-gradient(circle at 20% 30%, rgba(139,92,246,0.14), transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(99,102,241,0.1), transparent 50%);
+        }
+
+        .glass {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 1.5rem;
+        }
+        .dark .glass {
+            background: rgba(15,23,42,0.82);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .stat-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(139,92,246,0.13); }
+
+        .user-table { width: 100%; border-collapse: separate; border-spacing: 0 5px; }
+        .user-table thead th {
+            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.12em; color: #94a3b8; padding: 0 14px 10px;
+        }
+        .user-table tbody tr {
+            background: rgba(255,255,255,0.55);
+            transition: all 0.18s;
+        }
+        .dark .user-table tbody tr { background: rgba(30,41,59,0.48); }
+        .user-table tbody tr:hover { background: rgba(139,92,246,0.07); }
+        .user-table tbody td { padding: 13px 14px; }
+        .user-table tbody td:first-child { border-radius: 14px 0 0 14px; }
+        .user-table tbody td:last-child { border-radius: 0 14px 14px 0; }
+
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.42);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.22s ease;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: all; }
+        .modal-box {
+            background: #ffffff;
+            border-radius: 2rem;
+            padding: 2.5rem;
+            width: 90%; max-width: 460px;
+            transform: translateY(22px);
+            transition: transform 0.32s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.16);
+        }
+        .dark .modal-box { background: #0f172a; border: 1px solid rgba(255,255,255,0.08); }
+        .modal-overlay.show .modal-box { transform: translateY(0); }
+
+        .toast {
+            position: fixed; bottom: 96px; right: 20px; z-index: 2000;
+            padding: 13px 20px; border-radius: 16px; font-size: 13px; font-weight: 700;
+            color: white; transform: translateX(130%);
+            transition: transform 0.38s cubic-bezier(0.34,1.56,0.64,1);
+            max-width: 300px; pointer-events: none; line-height: 1.4;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: linear-gradient(135deg,#10b981,#059669); }
+        .toast.error   { background: linear-gradient(135deg,#ef4444,#dc2626); }
+        .toast.info    { background: linear-gradient(135deg,#8b5cf6,#6d28d9); }
+
+        .field-input {
+            width: 100%; padding: 11px 15px; border-radius: 12px;
+            border: 2px solid #e2e8f0; background: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px; outline: none; transition: border-color 0.2s, background 0.2s;
+            color: #0f172a;
+        }
+        .field-input:focus { border-color: #8b5cf6; background: #fff; }
+        .dark .field-input { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+        .dark .field-input:focus { border-color: #8b5cf6; background: #0f172a; }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.28); border-radius: 10px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .role-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            padding: 3px 9px; border-radius: 7px; font-size: 10px;
+            font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
+        mark { background: rgba(139,92,246,0.18); color: inherit; border-radius: 2px; }
+
+        .skeleton {
+            background: linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.6s infinite;
+            border-radius: 10px;
+        }
+        .dark .skeleton {
+            background: linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);
+            background-size: 200% 100%;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        .avatar-circle {
+            width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: 900; color: white;
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg,#8b5cf6,#6d28d9);
+            color: white; border: none; padding: 10px 20px;
+            border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 13px;
+            transition: opacity 0.18s, transform 0.1s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .primary-btn:hover { opacity: 0.88; transform: scale(0.98); }
+
+        .danger-btn {
+            background: linear-gradient(135deg,#ef4444,#dc2626);
+            color: white; border: none; padding: 10px 20px;
+            border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 13px;
+            transition: opacity 0.18s, transform 0.1s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .danger-btn:hover { opacity: 0.88; transform: scale(0.98); }
+
+        .secondary-btn {
+            background: #e2e8f0; color: #475569; border: none;
+            padding: 10px 20px; border-radius: 12px; font-weight: 800; cursor: pointer; font-size: 13px;
+            transition: background 0.18s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .secondary-btn:hover { background: #cbd5e1; }
+        .dark .secondary-btn { background: #1e293b; color: #94a3b8; }
+        .dark .secondary-btn:hover { background: #334155; }
+
+        .page-btn {
+            width: 34px; height: 34px; border-radius: 9px; border: none;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.18s;
+            background: transparent; color: #64748b;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .dark .page-btn { color: #94a3b8; }
+        .page-btn:hover { background: rgba(139,92,246,0.1); color: #8b5cf6; }
+        .page-btn.active { background: linear-gradient(135deg,#8b5cf6,#6d28d9); color: white; box-shadow: 0 4px 12px rgba(139,92,246,0.3); }
+        .page-btn:disabled { opacity: 0.28; cursor: not-allowed; }
+
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+        .fade-up { animation: fadeUp 0.35s ease both; }
+
+        @keyframes spin { to{transform:rotate(360deg)} }
+    </style>
+</head>
+<body class="p-4 md:p-8 pb-32 overflow-x-hidden min-h-screen">
+
+<div class="aura-bg"></div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="viewModal">
+    <div class="modal-box">
+        <div class="flex items-center justify-between mb-5">
+            <h3 class="text-lg font-black dark:text-white">User Profile</h3>
+            <button onclick="closeModal('viewModal')" class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 transition text-slate-500 font-black text-sm">✕</button>
+        </div>
+        <div id="viewModalContent"></div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">🗑️</div>
+            <h3 class="text-lg font-black dark:text-white mb-2">Delete User?</h3>
+            <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed" id="deleteModalMsg">This action cannot be undone.</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="closeModal('deleteModal')" class="secondary-btn flex-1">Cancel</button>
+            <button onclick="confirmDelete()" class="danger-btn flex-1">Delete Permanently</button>
+        </div>
+    </div>
+</div>
+
+<div class="max-w-[1500px] mx-auto">
+
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-5">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-violet-500/30 text-3xl">👑</div>
+            <div>
+                <h1 class="text-2xl font-black dark:text-white tracking-tight">Admin <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-400">Nexus</span></h1>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Directory Management Control</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 glass p-2 pr-5">
+            <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-slate-800 shadow-sm transition hover:scale-110">
+                <span id="theme-icon">🌙</span>
+            </button>
+            <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-slate-400 uppercase leading-none tracking-widest">Admin</p>
+                <p class="text-sm font-extrabold dark:text-white mt-0.5" id="adminName">—</p>
+            </div>
+            <div id="adminAvatar" class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-400 to-indigo-500 flex items-center justify-center text-white font-black text-base">A</div>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass stat-card p-5 fade-up" style="animation-delay:0ms">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xl">👥</span>
+                <span class="text-[9px] font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-lg">ALL</span>
+            </div>
+            <h3 class="text-3xl font-black dark:text-white" id="stat-total">—</h3>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Total Registered</p>
+        </div>
+        <div class="glass stat-card p-5 fade-up" style="animation-delay:60ms">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xl">🌸</span>
+                <span class="text-[9px] font-black text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-lg">USER</span>
+            </div>
+            <h3 class="text-3xl font-black dark:text-white" id="stat-users">—</h3>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Bloom Users</p>
+        </div>
+        <div class="glass stat-card p-5 fade-up" style="animation-delay:120ms">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xl">👑</span>
+                <span class="text-[9px] font-black text-violet-500 bg-violet-50 dark:bg-violet-900/20 px-2 py-0.5 rounded-lg">ADMIN</span>
+            </div>
+            <h3 class="text-3xl font-black dark:text-white" id="stat-admins">—</h3>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Administrators</p>
+        </div>
+        <div class="glass stat-card p-5 fade-up" style="animation-delay:180ms">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xl">🔍</span>
+                <span class="text-[9px] font-black text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-lg">LIVE</span>
+            </div>
+            <h3 class="text-3xl font-black dark:text-white" id="stat-filtered">—</h3>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Currently Showing</p>
+        </div>
+    </div>
+
+    <div class="glass p-6 md:p-8 fade-up" style="animation-delay:240ms">
+
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+            <div>
+                <h2 class="text-xl font-black dark:text-white">User Directory</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Manage all AuraBloom accounts</p>
+            </div>
+            <div class="flex flex-wrap gap-3 w-full lg:w-auto">
+                <div class="relative flex-1 min-w-[200px]">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search name or email..."
+                           class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/60 dark:bg-slate-900/50 dark:text-white border border-slate-200 dark:border-slate-700 outline-none text-xs font-semibold focus:border-violet-400 transition">
+                </div>
+                <select id="roleFilter" class="px-4 py-2.5 rounded-xl bg-white/60 dark:bg-slate-900/50 dark:text-white border border-slate-200 dark:border-slate-700 outline-none text-xs font-bold focus:border-violet-400 transition cursor-pointer">
+                    <option value="">All Roles</option>
+                    <option value="USER">🌸 User</option>
+                    <option value="ADMIN">👑 Admin</option>
+                </select>
+                <button onclick="loadUsers()" class="px-4 py-2.5 rounded-xl bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 text-xs font-black hover:bg-violet-100 dark:hover:bg-violet-900/30 transition border border-violet-200 dark:border-violet-800 flex items-center gap-2">
+                    <span id="refreshIcon" class="inline-block">🔄</span> Refresh
+                </button>
+            </div>
+        </div>
+
+
+        <div class="overflow-x-auto no-scrollbar">
+            <table class="user-table">
+                <thead>
+                <tr>
+                    <th class="text-left">User</th>
+                    <th class="text-left">Email</th>
+                    <th class="text-left">Role</th>
+                    <th class="text-left">ID</th>
+                    <th class="text-right pr-4">Actions</th>
+                </tr>
+                </thead>
+                <tbody id="userTableBody">
+                <tr><td colspan="5" class="py-2"><div class="skeleton h-12 rounded-2xl"></div></td></tr>
+                <tr><td colspan="5" class="py-2"><div class="skeleton h-12 rounded-2xl"></div></td></tr>
+                <tr><td colspan="5" class="py-2"><div class="skeleton h-12 rounded-2xl"></div></td></tr>
+                <tr><td colspan="5" class="py-2"><div class="skeleton h-12 rounded-2xl"></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <div id="emptyState" class="hidden text-center py-16 text-slate-400">
+            <span class="text-5xl block mb-3">🌵</span>
+            <p class="font-black text-base dark:text-slate-300">No users found</p>
+            <p class="text-sm mt-1">Try adjusting your search or filters</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between mt-5 gap-3">
+            <p class="text-xs font-bold text-slate-400" id="paginationInfo"></p>
+            <div class="flex items-center gap-1" id="paginationControls"></div>
+        </div>
+    </div>
+
+</div>
+
+<nav class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50">
+    <div class="flex items-center gap-2 px-5 py-3 glass shadow-2xl">
+        <button class="text-xl p-2 rounded-xl bg-violet-500/15 hover:bg-violet-500/25 transition" title="Admin Home">🛡️</button>
+        <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+        <button onclick="window.location.href='userdashboard.html'" class="text-xl p-2 rounded-xl opacity-50 hover:opacity-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="User Dashboard">🏠</button>
+        <button onclick="logout()" class="text-xl p-2 rounded-xl opacity-50 hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 transition" title="Logout">🚪</button>
+    </div>
+</nav>
+
+<script>
+    const API_BASE  = 'http://localhost:8080/api';
+    let   TOKEN     = localStorage.getItem('token');
+    let   allUsers  = [];
+    let   filtered  = [];
+    let   page      = 1;
+    const PER_PAGE  = 8;
+    let   deletePending = null;
+
+    (function() {
+        if (!TOKEN || localStorage.getItem('role') !== 'ADMIN') {
+            alert('Admin access only.');
+            location.href = 'sign-in.html';
+        }
+    })();
+
+    function toggleTheme() {
+        const dark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', dark ? 'dark' : 'light');
+        document.getElementById('theme-icon').textContent = dark ? '☀️' : '🌙';
+    }
+    (function initTheme() {
+        const t = localStorage.getItem('theme');
+        if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme:dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.getElementById('theme-icon').textContent = '☀️';
+        }
+    })();
+
+    let toastTimer;
+    function showToast(msg, type = 'info', ms = 3200) {
+        clearTimeout(toastTimer);
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.className = `toast ${type} show`;
+        toastTimer = setTimeout(() => el.classList.remove('show'), ms);
+    }
+
+    function openModal(id)  { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    document.querySelectorAll('.modal-overlay').forEach(el =>
+        el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); })
+    );
+
+    async function api(path, method = 'GET', body = null) {
+        const opts = {
+            method,
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${TOKEN}` }
+        };
+        if (body) opts.body = JSON.stringify(body);
+        const res  = await fetch(API_BASE + path, opts);
+        let   data = null;
+        try { data = await res.json(); } catch(_) {}
+        return { status: res.status, data };
+    }
+
+    async function loadAdminProfile() {
+        try {
+            const { data } = await api('/users/profile');
+            if (data?.code === 200) {
+                const u = data.data;
+                const name = u.username || u.email || 'Admin';
+                document.getElementById('adminName').textContent   = name;
+                document.getElementById('adminAvatar').textContent = name.charAt(0).toUpperCase();
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    async function loadUsers() {
+        const icon = document.getElementById('refreshIcon');
+        icon.style.animation = 'spin 0.7s linear infinite';
+        icon.style.display   = 'inline-block';
+
+        try {
+            const { status, data } = await api('/users');
+
+            if (status === 200 && data?.code === 200) {
+                allUsers = data.data || [];
+                applyFilter();
+                updateStats();
+                showToast(`✓ Loaded ${allUsers.length} users`, 'success');
+            } else if (status === 403) {
+                showToast('Forbidden — admin role required', 'error');
+            } else if (status === 401) {
+                showToast('Session expired, please log in again', 'error');
+                setTimeout(() => { localStorage.clear(); location.href = 'sign-in.html'; }, 2000);
+            } else {
+                showToast(data?.message || `Error ${status}`, 'error');
+            }
+        } catch(e) {
+            showToast('Network error — is the backend running?', 'error');
+            // Show error state in table
+            document.getElementById('userTableBody').innerHTML = `
+            <tr><td colspan="5" class="py-10 text-center">
+                <span class="text-3xl block mb-2">⚠️</span>
+                <p class="text-sm font-bold text-red-400">Could not reach server</p>
+                <p class="text-xs text-slate-400 mt-1">Check that Spring Boot is running on port 8080</p>
+            </td></tr>`;
+        } finally {
+            icon.style.animation = '';
+        }
+    }
+
+    function updateStats() {
+        const admins = allUsers.filter(u => u.role === 'ADMIN').length;
+        document.getElementById('stat-total').textContent    = allUsers.length;
+        document.getElementById('stat-users').textContent    = allUsers.length - admins;
+        document.getElementById('stat-admins').textContent   = admins;
+        document.getElementById('stat-filtered').textContent = filtered.length;
+    }
+
+    function applyFilter() {
+        const q    = document.getElementById('searchInput').value.trim().toLowerCase();
+        const role = document.getElementById('roleFilter').value;
+
+        filtered = allUsers.filter(u => {
+            const matchQ    = !q || (u.username||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q);
+            const matchRole = !role || u.role === role;
+            return matchQ && matchRole;
+        });
+
+        page = 1;
+        renderTable();
+        document.getElementById('stat-filtered').textContent = filtered.length;
+    }
+
+    function debounce(fn, ms) {
+        let t;
+        return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+    }
+    document.getElementById('searchInput').addEventListener('input', debounce(applyFilter, 220));
+    document.getElementById('roleFilter').addEventListener('change', applyFilter);
+
+
+    const GRAD = [
+        'from-violet-400 to-indigo-500',
+        'from-pink-400 to-rose-500',
+        'from-emerald-400 to-teal-500',
+        'from-amber-400 to-orange-500',
+        'from-blue-400 to-cyan-500',
+        'from-fuchsia-400 to-purple-500'
+    ];
+
+    function renderTable() {
+        const tbody = document.getElementById('userTableBody');
+        const empty = document.getElementById('emptyState');
+
+        if (!filtered.length) {
+            tbody.innerHTML = '';
+            empty.classList.remove('hidden');
+            renderPagination(0);
+            document.getElementById('paginationInfo').textContent = 'No results';
+            return;
+        }
+
+        empty.classList.add('hidden');
+
+        const q     = document.getElementById('searchInput').value.trim();
+        const start = (page - 1) * PER_PAGE;
+        const slice = filtered.slice(start, start + PER_PAGE);
+
+        tbody.innerHTML = slice.map((u, i) => {
+            const init  = (u.username || u.email || '?').charAt(0).toUpperCase();
+            const grad  = GRAD[(u.id || i) % GRAD.length];
+            const admin = u.role === 'ADMIN';
+            return `
+        <tr class="fade-up" style="animation-delay:${i * 35}ms">
+            <td>
+                <div class="flex items-center gap-3">
+                    <div class="avatar-circle bg-gradient-to-br ${grad}">${init}</div>
+                    <div>
+                        <p class="font-black text-sm dark:text-white leading-tight">${hl(u.username || '—', q)}</p>
+                        <p class="text-[10px] text-violet-400 font-bold uppercase tracking-tight mt-0.5">ID #${u.id}</p>
+                    </div>
+                </div>
+            </td>
+            <td class="text-xs font-semibold text-slate-500 dark:text-slate-400">${hl(u.email || '—', q)}</td>
+            <td>
+                <span class="role-badge ${admin
+                ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}">
+                    ${admin ? '👑' : '🌸'} ${u.role}
+                </span>
+            </td>
+            <td class="font-mono text-xs font-bold text-slate-400">#${u.id}</td>
+            <td class="text-right pr-2">
+                <div class="flex justify-end gap-1">
+                    <button onclick="viewUser(${u.id})"
+                        class="p-2 rounded-xl hover:bg-violet-50 dark:hover:bg-violet-900/20 transition text-violet-500 text-base"
+                        title="View user">👁️</button>
+                    <button onclick="promptDelete(${u.id}, '${esc(u.username || u.email)}')"
+                        class="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition text-red-400 text-base"
+                        title="Delete user">🗑️</button>
+                </div>
+            </td>
+        </tr>`;
+        }).join('');
+
+        renderPagination(filtered.length);
+        const end = Math.min(start + PER_PAGE, filtered.length);
+        document.getElementById('paginationInfo').textContent =
+            `Showing ${start + 1}–${end} of ${filtered.length} users`;
+    }
+
+    function hl(text, q) {
+        if (!q || !text) return text || '';
+        const safe = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return text.replace(new RegExp(`(${safe})`, 'gi'), '<mark>$1</mark>');
+    }
+
+    function esc(s) { return (s||'').replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+    function renderPagination(total) {
+        const pages = Math.ceil(total / PER_PAGE);
+        const wrap  = document.getElementById('paginationControls');
+        wrap.innerHTML = '';
+        if (pages <= 1) return;
+
+        const prev = btn('←', page === 1, () => { page--; renderTable(); });
+        wrap.appendChild(prev);
+
+        for (let p = 1; p <= pages; p++) {
+            if (pages > 7 && p > 2 && p < pages - 1 && Math.abs(p - page) > 1) {
+                if (p === 3 || p === pages - 2) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '…';
+                    dots.className = 'text-slate-400 px-1 text-xs font-bold';
+                    wrap.appendChild(dots);
+                }
+                continue;
+            }
+            wrap.appendChild(btn(p, false, () => { page = p; renderTable(); }, p === page));
+        }
+
+        const next = btn('→', page === pages, () => { page++; renderTable(); });
+        wrap.appendChild(next);
+    }
+
+    function btn(label, disabled, onClick, active = false) {
+        const b = document.createElement('button');
+        b.className = `page-btn${active ? ' active' : ''}`;
+        b.textContent = label;
+        b.disabled = disabled;
+        b.onclick = onClick;
+        return b;
+    }
+
+    function viewUser(id) {
+        const u = allUsers.find(u => u.id === id);
+        if (!u) return;
+
+        const admin = u.role === 'ADMIN';
+        const grad  = GRAD[(u.id || 0) % GRAD.length];
+        const init  = (u.username || u.email || '?').charAt(0).toUpperCase();
+
+        document.getElementById('viewModalContent').innerHTML = `
+        <div class="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mb-4">
+            <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-black text-2xl flex-shrink-0 bg-gradient-to-br ${grad}">${init}</div>
+            <div>
+                <p class="text-lg font-black dark:text-white leading-tight">${u.username || '—'}</p>
+                <span class="role-badge mt-1 inline-flex ${admin
+            ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400'
+            : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
+                    ${admin ? '👑' : '🌸'} ${u.role}
+                </span>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">User ID</p>
+                <p class="font-black text-slate-700 dark:text-slate-200 font-mono">#${u.id}</p>
+            </div>
+            <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Role</p>
+                <p class="font-black text-slate-700 dark:text-slate-200">${u.role}</p>
+            </div>
+            <div class="col-span-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Email</p>
+                <p class="font-black text-slate-700 dark:text-slate-200 break-all text-sm">${u.email}</p>
+            </div>
+            <div class="col-span-2 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                <p class="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Username</p>
+                <p class="font-black text-slate-700 dark:text-slate-200">${u.username || '—'}</p>
+            </div>
+        </div>
+        <button onclick="closeModal('viewModal'); promptDelete(${u.id}, '${esc(u.username || u.email)}')"
+            class="w-full py-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 font-black text-sm hover:bg-red-100 dark:hover:bg-red-900/30 transition">
+            🗑️ Delete This Account
+        </button>`;
+
+        openModal('viewModal');
+    }
+
+    function promptDelete(id, name) {
+        deletePending = { id, name };
+        document.getElementById('deleteModalMsg').innerHTML =
+            `You are about to permanently delete <strong class="dark:text-white">${name}</strong>.<br>This cannot be undone.`;
+        openModal('deleteModal');
+    }
+
+    async function confirmDelete() {
+        if (!deletePending) return;
+        closeModal('deleteModal');
+
+        const { id, name } = deletePending;
+        showToast(`Deleting ${name}…`, 'info', 5000);
+
+        try {
+            const { status, data } = await api(`/users/${id}`, 'DELETE');
+
+            if (status === 200) {
+                allUsers = allUsers.filter(u => u.id !== id);
+                applyFilter();
+                updateStats();
+                showToast(`✓ ${name} deleted`, 'success');
+            } else if (status === 404) {
+                showToast('User not found on server', 'error');
+            } else if (status === 403) {
+                showToast('Forbidden — cannot delete this user', 'error');
+            } else {
+                showToast(data?.message || `Server returned ${status}`, 'error');
+            }
+        } catch(e) {
+            showToast('Network error during deletion', 'error');
+        } finally {
+            deletePending = null;
+        }
+    }
+
+    function logout() {
+        showToast('Logging out…', 'info', 1400);
+        setTimeout(() => {
+            localStorage.clear();
+            location.href = 'sign-in.html';
+        }, 1200);
+    }
+
+    loadAdminProfile();
+    loadUsers();
+</script>
+</body>
+</html>

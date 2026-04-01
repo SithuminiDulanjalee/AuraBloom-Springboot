@@ -113,4 +113,11 @@ public class UserServiceImpl implements UserService {
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteUserById(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new CustomException(HttpStatus.NOT_FOUND, "User not found"));
+        userRepository.delete(user);
+    }
 }
