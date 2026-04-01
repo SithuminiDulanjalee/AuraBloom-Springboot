@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraBloom | Admin Nexus Security</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f8fafc; transition: background 0.5s ease; }
+        .dark body { background: #020617; }
+        .aura-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.12), transparent 50%); z-index: -1; pointer-events: none; }
+        .glass-morph { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 2rem; }
+        .dark .glass-morph { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .input-glass { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(139, 92, 246, 0.2); border-radius: 1rem; transition: all 0.3s ease; }
+        .dark .input-glass { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); color: white; }
+        .input-glass:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.2); }
+        .strength-bar { height: 6px; border-radius: 3px; transition: all 0.5s ease; }
+        .danger-zone { border: 1px solid rgba(244, 63, 94, 0.2); background: rgba(244, 63, 94, 0.05); }
+        select.input-glass { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236366f1'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.5rem; }
+    </style>
+</head>
+<body class="p-4 md:p-8 lg:p-12 overflow-x-hidden pb-32">
+<div class="aura-bg"></div>
+
+<div class="max-w-[1400px] mx-auto">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+        <div class="flex items-center gap-4">
+            <div class="w-20 h-20 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg">
+                <span class="text-4xl">👑</span>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tighter dark:text-white">Nexus <span class="text-violet-500">Security</span></h1>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Master Admin Control</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 glass-morph p-2 pr-6">
+            <button onclick="toggleTheme()" class="w-10 h-10 rounded-xl flex items-center justify-center bg-white dark:bg-slate-800 shadow-sm transition hover:scale-110">
+                <span id="theme-icon">🌙</span>
+            </button>
+            <div class="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Authority</p>
+                <p class="text-sm font-extrabold text-violet-500">Root Administrator</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-12 gap-8">
+        <div class="col-span-12 lg:col-span-4 space-y-6">
+            <div class="glass-morph p-8 text-center relative overflow-hidden group">
+                <div class="relative w-32 h-32 mx-auto mb-6">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=AdminFelix" alt="Admin Avatar" class="rounded-full bg-violet-50 border-4 border-white dark:border-slate-700 shadow-xl">
+                    <div class="absolute bottom-0 right-0 w-8 h-8 bg-emerald-500 border-4 border-white dark:border-slate-800 rounded-full"></div>
+                </div>
+                <h2 class="text-2xl font-black dark:text-white" id="admin-display-name">Loading...</h2>
+                <p class="text-sm text-slate-500 font-medium mb-6" id="admin-display-email">Loading...</p>
+                <div class="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-2xl border border-violet-100 dark:border-violet-800/50">
+                    <p class="text-[10px] font-bold text-violet-400 uppercase tracking-widest mb-1">Access Level</p>
+                    <p class="text-lg font-black text-violet-600 dark:text-violet-400 uppercase">Root Nexus</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-12 lg:col-span-8 space-y-8">
+
+            <div class="glass-morph p-8 border-t-4 border-indigo-500">
+                <div class="flex items-center gap-3 mb-8">
+                    <span class="text-2xl">✨</span>
+                    <h2 class="text-xl font-black dark:text-white">System Provisioning</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Account Role</label>
+                        <select id="provision-role" class="input-glass p-4 w-full text-sm font-bold cursor-pointer">
+                            <option value="USER">USER</option>
+                            <option value="ADMIN">ADMIN</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                        <input type="text" id="provision-username" class="input-glass p-4 w-full text-sm font-bold" placeholder="Username">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                        <input type="email" id="provision-email" class="input-glass p-4 w-full text-sm font-bold" placeholder="email@aurabloom.com">
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Temporary Password</label>
+                        <div class="relative">
+                            <input type="password" id="provision-pass" class="input-glass p-4 w-full text-sm font-bold" placeholder="••••••••">
+                            <button onclick="toggleVisibility('#provision-pass')" class="absolute right-4 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100">👁️</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end">
+                    <button onclick="provisionAccount()" class="px-8 py-4 bg-indigo-600 text-white font-black text-sm rounded-2xl hover:bg-indigo-700 transition shadow-xl shadow-indigo-500/20">
+                        Create New Account
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-morph p-8">
+                <h2 class="text-xl font-black dark:text-white mb-8">Personal Admin Identity</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Your Username</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="admin-username" class="input-glass p-4 w-full text-sm font-bold">
+                            <button onclick="updateAdminProfile()" class="px-6 py-4 bg-violet-500 text-white font-black text-xs rounded-2xl">Update</button>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Your Email</label>
+                        <div class="flex gap-2">
+                            <input type="email" id="admin-email" class="input-glass p-4 w-full text-sm font-bold">
+                            <button onclick="updateAdminProfile()" class="px-6 py-4 bg-violet-500 text-white font-black text-xs rounded-2xl">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-morph p-8">
+                <h2 class="text-xl font-black dark:text-white mb-8">Update Password</h2>
+                <form id="admin-password-form" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Current Password</label>
+                            <input type="password" id="current-pass" class="input-glass p-4 w-full text-sm font-bold" placeholder="••••••••">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">New Password</label>
+                            <input type="password" id="new-pass" class="input-glass p-4 w-full text-sm font-bold" placeholder="Min 6 chars">
+                            <div class="flex gap-1 mt-2">
+                                <div class="strength-bar flex-1 bg-slate-200 dark:bg-slate-700" id="sb-1"></div>
+                                <div class="strength-bar flex-1 bg-slate-200 dark:bg-slate-700" id="sb-2"></div>
+                                <div class="strength-bar flex-1 bg-slate-200 dark:bg-slate-700" id="sb-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="px-10 py-4 bg-gradient-to-r from-violet-500 to-indigo-600 text-white font-black text-sm rounded-2xl shadow-xl">
+                            Save Security Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50">
+    <div class="flex items-center gap-2 px-5 py-3 glass shadow-2xl">
+        <button onclick="window.location.href='admindashboard.html'" class="text-2xl opacity-50 hover:opacity-100 transition-all" title="Admin Home">🛡️</button>
+        <button onclick="window.location.href='adminsecurity.html'" class="text-2xl opacity-50 hover:opacity-100 transition-all" title="Admin Profile">👥</button>
+        <button onclick="window.location.href='adminchallenges.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Admin Challenges">🎯</button>
+        <button onclick="logout()" class="text-xl p-2 rounded-xl opacity-50 hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 transition" title="Logout">🚪</button>
+    </div>
+</nav>
+
+<script>
+    const API_ADMIN = "http://localhost:8080/api/admins";
+    const API_USER = "http://localhost:8080/api/users";
+
+    $(document).ready(() => {
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            $('#theme-icon').text('☀️');
+        } else {
+            $('#theme-icon').text('🌙');
+        }
+
+        loadAdminProfile();
+
+        $('#new-pass').on('input', function() {
+            const pass = $(this).val();
+            const bars = [$('#sb-1'), $('#sb-2'), $('#sb-3')];
+
+            bars.forEach(b => b.removeClass('bg-rose-400 bg-amber-400 bg-emerald-400').addClass('bg-slate-200 dark:bg-slate-700'));
+
+            if (pass.length > 0 && pass.length < 6) {
+                bars[0].addClass('bg-rose-400');
+            } else if (pass.length >= 6 && pass.length < 12) {
+                bars[0].addClass('bg-amber-400');
+                bars[1].addClass('bg-amber-400');
+            } else if (pass.length >= 12) {
+                bars.forEach(b => b.addClass('bg-emerald-400'));
+            }
+        });
+
+        $('#admin-password-form').on('submit', (e) => {
+            e.preventDefault();
+            changeAdminPassword();
+        });
+    });
+
+    function getAuthHeader() {
+        return { "Authorization": `Bearer ${localStorage.getItem("token")}` };
+    }
+
+    function loadAdminProfile() {
+        $.ajax({
+            url: `${API_ADMIN}/profile`,
+            method: "GET",
+            headers: getAuthHeader(),
+            success: (res) => {
+                if (res.data) {
+                    $('#admin-display-name, #admin-username').text(res.data.username).val(res.data.username);
+                    $('#admin-display-email, #admin-email').text(res.data.email).val(res.data.email);
+                }
+            },
+            error: (xhr) => {
+                if (xhr.status === 403) alert("Session expired. Please login again.");
+            }
+        });
+    }
+
+    function provisionAccount() {
+        const role = $('#provision-role').val();
+        const payload = {
+            username: $('#provision-username').val().trim(),
+            email: $('#provision-email').val().trim(),
+            password: $('#provision-pass').val()
+        };
+
+        if(!payload.username || !payload.email || !payload.password) {
+            alert("All fields are required.");
+            return;
+        }
+
+        const targetUrl = (role === 'ADMIN') ? `${API_ADMIN}/create` : `${API_USER}/register`;
+
+        $.ajax({
+            url: targetUrl,
+            method: "POST",
+            contentType: "application/json",
+            headers: getAuthHeader(),
+            data: JSON.stringify(payload),
+            success: (res) => {
+                alert(`${role} account created successfully!`);
+                $('#provision-username, #provision-email, #provision-pass').val('');
+            },
+            error: (xhr) => {
+                alert("Error: " + (xhr.responseJSON?.message || "Provisioning failed."));
+            }
+        });
+    }
+
+    function toggleVisibility(id) {
+        const el = $(id);
+        el.attr('type', el.attr('type') === 'password' ? 'text' : 'password');
+    }
+
+    function updateAdminProfile() {
+        const payload = {
+            username: $('#admin-username').val(),
+            email: $('#admin-email').val()
+        };
+
+        $.ajax({
+            url: `${API_ADMIN}/profile`,
+            method: "PUT",
+            contentType: "application/json",
+            headers: getAuthHeader(),
+            data: JSON.stringify(payload),
+            success: (res) => {
+                alert("Identity updated successfully.");
+
+                if (res.data && res.data.token) {
+                    localStorage.setItem("token", res.data.token);
+                }
+
+                loadAdminProfile();
+            },
+            error: (xhr) => {
+                alert("Update failed: " + (xhr.responseJSON?.message || "Forbidden"));
+            }
+        });
+    }
+
+    function changeAdminPassword() {
+        const payload = {
+            currentPassword: $('#current-pass').val(),
+            newPassword: $('#new-pass').val()
+        };
+
+        if (!payload.currentPassword || !payload.newPassword) {
+            alert("Current and New passwords are required.");
+            return;
+        }
+
+        $.ajax({
+            url: `${API_ADMIN}/profile/password`,
+            method: "PUT",
+            contentType: "application/json",
+            headers: getAuthHeader(),
+            data: JSON.stringify(payload),
+            success: (res) => {
+                alert("Password updated successfully.");
+
+                if (res.data && res.data.token) {
+                    localStorage.setItem("token", res.data.token);
+                }
+
+                $('#current-pass, #new-pass').val('');
+            },
+            error: (xhr) => {
+                alert("Error: " + (xhr.responseJSON?.message || "Failed to update password."));
+            }
+        });
+    }
+
+    function toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        $('#theme-icon').text(isDark ? '☀️' : '🌙');
+    }
+
+    function logout() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("role");
+        alert("Logged out successfully!");
+        window.location.href = "sign-in.html";
+    }
+</script>
+</body>
+</html>
