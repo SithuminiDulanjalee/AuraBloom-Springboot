@@ -27,6 +27,8 @@ public class RiskEngineServiceImpl implements RiskEngineService {
     private final DailyChallengeRepository dailyChallengeRepository;
     private final BadgeRepository badgeRepository;
 
+    private final RiskReportRepository riskReportRepository;
+
     @Value("${groq.api.key}")
     private String groqApiKey;
 
@@ -58,33 +60,23 @@ public class RiskEngineServiceImpl implements RiskEngineService {
             riskScore = (neg * 100.0) / monthMoods.size();
         }
 
-
-
         long journalCount = journalEntryRepository.countByUser(user);
-
-
 
         int weeklyMinutes = meditationSessionRepository
                 .findByUserAndSessionDateBetween(user, weekStart, today)
                 .stream().mapToInt(MeditationSession::getDuration).sum();
 
-
-
         long completedChallenges = dailyChallengeRepository.findByUser(user)
                 .stream().filter(DailyChallenge::isCompleted).count();
 
-
-
         long badgeCount = badgeRepository.findByUser(user).size();
-
-
 
         List<String> insights = generateInsights(riskScore, (int) allMoods.size(),
                 (int) journalCount, weeklyMinutes, (int) completedChallenges, moodDist);
 
         String riskLevel = riskScore < 25 ? "LOW"
                 : riskScore < 50 ? "MODERATE"
-                : riskScore < 75 ? "ELEVATED" : "HIGH";
+                  : riskScore < 75 ? "ELEVATED" : "HIGH";
 
         return RiskReportDTO.builder()
                 .emotionalRiskScore(Math.round(riskScore * 10.0) / 10.0)
@@ -99,54 +91,74 @@ public class RiskEngineServiceImpl implements RiskEngineService {
                 .build();
     }
 
+    
+    @Override
+    public void saveRiskAssessment(String email, RiskReportDTO riskReportDTO) {
+        User user = getUser(email);
+
+        RiskReport riskReport = new RiskReport();
+        riskReport.setUser(user);
+        riskReport.setEmotionalRiskScore(riskReportDTO.getEmotionalRiskScore());
+        riskReport.setRiskLevel(riskReportDTO.getRiskLevel());
+        riskReport.setTotalMoodEntries(riskReportDTO.getTotalMoodEntries());
+        riskReport.setTotalJournalEntries(riskReportDTO.getTotalJournalEntries());
+        riskReport.setTotalMeditationMinutes(riskReportDTO.getTotalMeditationMinutes());
+        riskReport.setCompletedChallengesCount(riskReportDTO.getCompletedChallengesCount());
+        riskReport.setBadgeCount(riskReportDTO.getBadgeCount());
+        riskReport.setAiInsights(riskReportDTO.getAiInsights());
+
+        riskReport.setGeneratedAt(LocalDate.now());
+
+        riskReportRepository.save(riskReport);
+    }
+
     private List<String> generateInsights(double riskScore, int moods, int journals,
-                                           int meditationMins, int challenges,
-                                           Map<String, Long> moodDist) {
+                                          int meditationMins, int challenges,
+                                          Map<String, Long> moodDist) {
+
         String prompt = String.format(
-            "You are a mental wellness analyst. Generate exactly 3 concise insight sentences " +
-            "(max 18 words each) for a user with this data:\n" +
-            "- Emotional risk score: %.1f%%\n" +
-            "- Mood entries: %d\n" +
-            "- Journal entries: %d\n" +
-            "- Weekly meditation minutes: %d\n" +
-            "- Completed challenges: %d\n" +
-            "- Mood distribution: %s\n" +
-            "Format: return a JSON array of 3 strings only. No markdown, no keys, just the array.",
-            riskScore, moods, journals, meditationMins, challenges, moodDist
+                "You are a mental wellness analyst. Generate exactly 3 concise insight sentences " +
+                        "(max 18 words each) for a user with this data:\n" +
+                        "- Emotional risk score: %.1f%%\n" +
+                        "- Mood entries: %d\n" +
+                        "- Journal entries: %d\n" +
+                        "- Weekly meditation minutes: %d\n" +
+                        "- Completed challenges: %d\n" +
+                        "- Mood distribution: %s\n" +
+                        "Format: return a JSON array of 3 strings only. No markdown, no keys, just the array.",
+                riskScore, moods, journals, meditationMins, challenges, moodDist
         );
 
         Map<String, Object> body = Map.of(
-            "model", "llama-3.3-70b-versatile",
-            "messages", List.of(
-                Map.of("role", "system", "content",
-                    "You are a wellness insight engine. Respond ONLY with a valid JSON array of exactly 3 strings."),
-                Map.of("role", "user", "content", prompt)
-            ),
-            "max_tokens", 200,
-            "temperature", 0.5
+                "model", "llama-3.3-70b-versatile",
+                "messages", List.of(
+                        Map.of("role", "system", "content",
+                                "You are a wellness insight engine. Respond ONLY with a valid JSON array of exactly 3 strings."),
+                        Map.of("role", "user", "content", prompt)
+                ),
+                "max_tokens", 200,
+                "temperature", 0.5
         );
 
         try {
             WebClient client = WebClient.builder()
-                .baseUrl("https://api.groq.com/openai/v1/chat/completions")
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + groqApiKey)
-                .build();
+                    .baseUrl("https://api.groq.com/openai/v1/chat/completions")
+                    .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + groqApiKey)
+                    .build();
 
             Map<?, ?> response = client.post()
-                .bodyValue(body)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
 
             if (response != null && response.containsKey("choices")) {
                 List<?> choices = (List<?>) response.get("choices");
                 Map<?, ?> choice = (Map<?, ?>) choices.get(0);
                 Map<?, ?> message = (Map<?, ?>) choice.get("message");
                 String raw = ((String) message.get("content")).trim();
-                // Strip markdown fences if present
                 raw = raw.replaceAll("```json|```", "").trim();
-                // Parse naive JSON array
                 raw = raw.replaceAll("^\\[|]$", "").trim();
                 String[] parts = raw.split("\",\\s*\"");
                 List<String> result = new ArrayList<>();
@@ -157,11 +169,10 @@ public class RiskEngineServiceImpl implements RiskEngineService {
             }
         } catch (Exception ignored) {}
 
-        // Fallback static insights
         return List.of(
-            "Your mood patterns suggest elevated stress — consider a short breathing break.",
-            "Regular journaling is linked to lower anxiety. Keep it up!",
-            "Completing daily challenges builds emotional resilience over time."
+                "Your mood patterns suggest elevated stress — consider a short breathing break.",
+                "Regular journaling is linked to lower anxiety. Keep it up!",
+                "Completing daily challenges builds emotional resilience over time."
         );
     }
 }

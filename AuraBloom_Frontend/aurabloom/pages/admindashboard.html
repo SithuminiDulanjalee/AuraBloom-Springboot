@@ -326,9 +326,9 @@
 
 <nav class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50">
     <div class="flex items-center gap-2 px-5 py-3 glass shadow-2xl">
-        <button class="text-xl p-2 rounded-xl bg-violet-500/15 hover:bg-violet-500/25 transition" title="Admin Home">🛡️</button>
-        <div class="h-5 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
-        <button onclick="window.location.href='userdashboard.html'" class="text-xl p-2 rounded-xl opacity-50 hover:opacity-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="User Dashboard">🏠</button>
+        <button onclick="window.location.href='admindashboard.html'" class="text-2xl opacity-50 hover:opacity-100 transition-all" title="Admin Home">🛡️</button>
+        <button onclick="window.location.href='adminsecurity.html'" class="text-2xl opacity-50 hover:opacity-100 transition-all" title="Admin Profile">👥</button>
+        <button onclick="window.location.href='adminchallenges.html'" class="text-2xl hover:scale-125 transition-transform flex-shrink-0" title="Admin Challenges">🎯</button>
         <button onclick="logout()" class="text-xl p-2 rounded-xl opacity-50 hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 transition" title="Logout">🚪</button>
     </div>
 </nav>
@@ -666,11 +666,13 @@
     }
 
     function logout() {
-        showToast('Logging out…', 'info', 1400);
-        setTimeout(() => {
-            localStorage.clear();
-            location.href = 'sign-in.html';
-        }, 1200);
+        localStorage.removeItem("token");
+        localStorage.removeItem("username");
+        localStorage.removeItem("userEmail");
+        localStorage.removeItem("role");
+
+        alert("Logged out successfully!");
+        window.location.href = "sign-in.html";
     }
 
     loadAdminProfile();

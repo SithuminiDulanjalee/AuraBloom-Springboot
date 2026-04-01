@@ -1,10 +1,7 @@
 package lk.ijse.aurabloom_backend.controller;
 
 import jakarta.validation.Valid;
-import lk.ijse.aurabloom_backend.dto.PasswordChangeDTO;
-import lk.ijse.aurabloom_backend.dto.ProfileResponseDTO;
-import lk.ijse.aurabloom_backend.dto.ProfileUpdateDTO;
-import lk.ijse.aurabloom_backend.dto.UserResponseDTO;
+import lk.ijse.aurabloom_backend.dto.*;
 import lk.ijse.aurabloom_backend.service.custom.UserService;
 import lk.ijse.aurabloom_backend.util.APIResponse;
 import lombok.RequiredArgsConstructor;
@@ -77,6 +74,17 @@ public class UserController {
     public ResponseEntity<APIResponse<String>> deleteUserById(@PathVariable Long id) {
         userService.deleteUserById(id);
         return new ResponseEntity<>(new APIResponse<>(200, "User deleted", null), HttpStatus.OK);
+    }
+
+    @PostMapping("/register")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<APIResponse<UserResponseDTO>> registerUser(
+            @Valid @RequestBody RegisterRequestDTO dto
+    ) {
+        return new ResponseEntity<>(
+                new APIResponse<>(201, "User registered successfully", userService.register(dto)),
+                HttpStatus.CREATED
+        );
     }
 
 }
